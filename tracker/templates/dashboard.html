@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bread Tracker</title>
+    <!-- Auto-refresh page every 60 seconds -->
+    <meta http-equiv="refresh" content="60">
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+        .card { border: 1px solid #ccc; padding: 15px; border-radius: 8px; }
+        .active { background-color: #e6f4ea; border-color: #34a853; }
+        .idle { background-color: #f1f3f4; }
+    </style>
+</head>
+<body>
+
+    <header style="display: flex; justify-content: space-between; align-items: center;">
+        <h1>🍞 Bread Tracker</h1>
+        {% if user.is_authenticated %}
+            <a href="/admin/tracker/loaf/add/">+ Add New Loaf</a>
+        {% else %}
+            <a href="/admin/login/?next=/">Admin Login</a>
+        {% endif %}
+    </header>
+
+    <h2>Active Machines</h2>
+    <div class="grid">
+        {% for machine in all_machines %}
+            <div class="card {% if machine.id in active_machine_ids %}active{% else %}idle{% endif %}">
+                <h3>{{ machine.name }}</h3>
+                
+                {% for loaf in active_loaves %}
+                    {% if loaf.machine_id == machine.id %}
+                        <p><strong>Loaf:</strong> {{ loaf.bread_type }}</p>
+                        <p><strong>Ready at:</strong> {{ loaf.ready_at|time:"g:i A" }}</p>
+                        <p><small>Started: {{ loaf.started_at|time:"g:i A" }}</small></p>
+                    {% endif %}
+                {% empty %}
+                    {% if machine.id not in active_machine_ids %}
+                        <p><em>Idle / Available</em></p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2>Baking History</h2>
+    <ul>
+        {% for loaf in history_loaves %}
+            <li>
+                <strong>{{ loaf.bread_type }}</strong> ({{ loaf.machine.name }}) — 
+                Finished at {{ loaf.ready_at|date:"M d, Y @ g:i A" }}
+            </li>
+        {% empty %}
+            <li>No completed loaves yet.</li>
+        {% endfor %}
+    </ul>
+
+</body>
+</html>
