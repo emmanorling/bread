@@ -1,17 +1,152 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Bread Tracker</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Auto-refresh page every 60 seconds -->
     <meta http-equiv="refresh" content="60">
+    <title>🍞 Bread Tracker</title>
+    
     <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
-        .card { border: 1px solid #ccc; padding: 15px; border-radius: 8px; }
-        .active { background-color: #e6f4ea; border-color: #34a853; }
-        .idle { background-color: #f1f3f4; }
+        /* Mobile-first base styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #212529;
+            padding: 16px;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin: 24px 0 12px 0;
+            color: #495057;
+        }
+
+        /* Responsive button */
+        .btn-add {
+            display: inline-block;
+            background-color: #2b8a3e;
+            color: white;
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .btn-add:hover {
+            background-color: #2b7a36;
+        }
+
+        /* Machine Grid: 1 column on phones, multi-column on larger screens */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr; /* Default: Single full-width column for phones */
+            gap: 16px;
+        }
+
+        @media (min-width: 550px) {
+            .grid {
+                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            }
+        }
+
+        /* Machine Cards */
+        .card {
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #dee2e6;
+            background-color: #ffffff;
+        }
+
+        .card.active {
+            background-color: #f4fce3;
+            border-color: #94d82d;
+        }
+
+        .card.idle {
+            background-color: #f8f9fa;
+            border-color: #e9ecef;
+            color: #868e96;
+        }
+
+        .card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #212529;
+        }
+
+        .loaf-type {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2b8a3e;
+            margin-bottom: 6px;
+        }
+
+        .time-badge {
+            display: inline-block;
+            background-color: #e6fcf5;
+            color: #0ca678;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            margin-top: 4px;
+        }
+
+        /* History List */
+        .history-list {
+            list-style: none;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #dee2e6;
+            overflow: hidden;
+        }
+
+        .history-item {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f1f3f5;
+            font-size: 0.95rem;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-date {
+            color: #868e96;
+            font-size: 0.85rem;
+            display: block;
+            margin-top: 2px;
+        }
     </style>
 </head>
+
 <body>
 
     <header style="display: flex; justify-content: space-between; align-items: center;">

@@ -1,0 +1,195 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    /* Custom Admin Dashboard Styles */
+    #content {
+        padding: 20px 30px !important;
+    }
+
+    /* Quick Action Header Card */
+    .dashboard-hero {
+        background: #ffffff;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .dashboard-hero h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #212529;
+    }
+
+    .dashboard-hero p {
+        margin: 4px 0 0 0;
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+
+    /* Primary Action Button */
+    .btn-quick-add {
+        background-color: #2b8a3e !important;
+        color: #ffffff !important;
+        padding: 12px 20px !important;
+        border-radius: 8px !important;
+        text-decoration: none !important;
+        font-weight: 600 !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background-color 0.2s;
+    }
+
+    .btn-quick-add:hover {
+        background-color: #2b7a36 !important;
+    }
+
+    /* App Modules Styling */
+    .module {
+        background: #ffffff !important;
+        border: 1px solid #e9ecef !important;
+        border-radius: 10px !important;
+        margin-bottom: 20px !important;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    .module table {
+        width: 100% !important;
+    }
+
+    .module caption {
+        background: #f8f9fa !important;
+        color: #495057 !important;
+        font-weight: 700 !important;
+        padding: 12px 16px !important;
+        border-bottom: 1px solid #e9ecef !important;
+        text-align: left;
+    }
+
+    /* Clean links inside modules */
+    .module td a {
+        color: #2b8a3e !important;
+        font-weight: 600;
+    }
+
+    /* Sidebar / Recent Actions styling */
+    #content-related {
+        background: #ffffff !important;
+        border: 1px solid #e9ecef !important;
+        border-radius: 10px !important;
+        padding: 16px !important;
+    }
+
+    #content-related h2 {
+        color: #495057 !important;
+        background: transparent !important;
+        padding: 0 0 12px 0 !important;
+        border-bottom: 1px solid #e9ecef !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+
+    <!-- Custom Hero Header with Direct Shortcut -->
+    <div class="dashboard-hero">
+        <div>
+            <h1>🍞 Bread Tracker Management</h1>
+            <p>Welcome back! Select an option below to manage machines or log a new loaf.</p>
+        </div>
+        <div>
+            <a href="{% url 'admin:tracker_loaf_add' %}" class="btn-quick-add">
+                <span>+ Start New Loaf</span>
+            </a>
+            <a href="/" target="_blank" style="margin-left: 12px; color: #495057; text-decoration: none; font-size: 0.9rem;">
+                View Public Site ↗
+            </a>
+        </div>
+    </div>
+
+    <!-- Standard Django Apps / Models List -->
+    {% if app_list %}
+        {% for app in app_list %}
+            <div class="app-{{ app.app_label }} module">
+                <table>
+                <caption>
+                    <a href="{{ app.app_url }}" class="section" title="{% blocktranslate with name=app.name %}Models in the {{ name }} application{% endblocktranslate %}">{{ app.name }}</a>
+                </caption>
+                {% for model in app.models %}
+                    <tr class="model-{{ model.object_name|lower }}">
+                    {% if model.admin_url %}
+                        <th scope="row"><a href="{{ model.admin_url }}">{{ model.name }}</a></th>
+                    {% else %}
+                        <th scope="row">{{ model.name }}</th>
+                    {% endif %}
+
+                    {% if model.add_url %}
+                        <td style="width: 80px;"><a href="{{ model.add_url }}" class="addlink">{% translate 'Add' %}</a></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+
+                    {% if model.admin_url %}
+                        {% if model.view_only %}
+                            <td style="width: 80px;"><a href="{{ model.admin_url }}" class="viewlink">{% translate 'View' %}</a></td>
+                        {% else %}
+                            <td style="width: 80px;"><a href="{{ model.admin_url }}" class="changelink">{% translate 'Change' %}</a></td>
+                        {% endif %}
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    </tr>
+                {% endfor %}
+                </table>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>{% translate "You don't have permission to view or edit anything." %}</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+<!-- Keep Django's default 'Recent Actions' sidebar on the right -->
+{% block sidebar %}
+<div id="content-related">
+    <div class="module" id="recent-actions-module">
+        <h2>{% translate 'Recent Actions' %}</h2>
+        <h3>{% translate 'My Actions' %}</h3>
+        {% load log %}
+        {% get_admin_log 10 as admin_log for_user user %}
+        {% if not admin_log %}
+            <p>{% translate 'None available' %}</p>
+        {% else %}
+            <ul class="actionlist">
+            {% for entry in admin_log %}
+                <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
+                    {% if entry.is_deletion or not entry.get_admin_url %}
+                        {{ entry.object_repr }}
+                    {% else %}
+                        <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+                    {% endif %}
+                    <br>
+                    {% if entry.content_type %}
+                        <span class="mini quiet">{% filter capfirst %}{{ entry.content_type }}{% endfilter %}</span>
+                    {% else %}
+                        <span class="mini quiet">{% translate 'Unknown content' %}</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
