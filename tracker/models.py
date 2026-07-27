@@ -17,6 +17,10 @@ class Loaf(models.Model):
     def is_active(self):
         return self.ready_at > timezone.now()
 
+    class Meta:
+        verbose_name = "Loaf"
+        verbose_name_plural = "Loaves"  # <-- Fixes "Loafs" -> "Loaves"
+
     def __str__(self):
         return f"{self.bread_type} in {self.machine.name}"
 
