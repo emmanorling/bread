@@ -144,6 +144,16 @@
             display: block;
             margin-top: 2px;
         }
+
+	.comment-count {
+	    background-color: #e9ecef;
+	    color: #495057;
+	    font-size: 0.85em;
+	    padding: 2px 8px;
+	    border-radius: 12px;
+	    margin-left: 8px;
+	    font-weight: bold;
+	}
     </style>
 </head>
 
@@ -180,16 +190,21 @@
     </div>
 
     <h2>Baking History</h2>
-    <ul>
-        {% for loaf in history_loaves %}
-            <li>
-                <strong>{{ loaf.bread_type }}</strong> ({{ loaf.machine.name }}) — 
-                Finished at {{ loaf.ready_at|date:"M d, Y @ g:i A" }}
-            </li>
-        {% empty %}
-            <li>No completed loaves yet.</li>
-        {% endfor %}
-    </ul>
+    {% for loaf in history_loaves %}
+	<div class="loaf-card">
+	    <a href="{% url 'loaf_detail' loaf.id %}">
+		<strong>{{ loaf.bread_type }}</strong>
+	    </a>
+	    <span> - Ready at {{ loaf.ready_at|date:"H:i" }}</span>
+
+	    <!-- Display Comment Count Badge if comments exist -->
+	    {% if loaf.comment_count > 0 %}
+		<span class="comment-count">
+		    💬 {{ loaf.comment_count }} comment{{ loaf.comments.count|pluralize }}
+		</span>
+	    {% endif %}
+	</div>
+    {% endfor %}
 
 </body>
 </html>
