@@ -22,4 +22,5 @@ from tracker.views import public_dashboard
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', public_dashboard, name='dashboard'),
+    path('loaf/<int:loaf_id>/', views.loaf_detail, name='loaf_detail'),
 ]
