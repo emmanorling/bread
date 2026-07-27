@@ -62,8 +62,11 @@ class LoafAdminForm(forms.ModelForm):
         fields = ['machine', 'bread_type', 'ready_in']
 
     def __init__(self, *args, **kwargs):
+        # Extract request passed from ModelAdmin (if available)
+        request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
-        # If editing an existing loaf, pre-populate 'ready_in' with remaining hours & minutes
+
+        # 1. EDIT MODE: Load remaining duration for existing loaf
         if self.instance and self.instance.pk and self.instance.ready_at:
             now = timezone.now()
             if self.instance.ready_at > now:
@@ -74,6 +77,16 @@ class LoafAdminForm(forms.ModelForm):
                 self.fields['ready_in'].initial = f"{hours:02d}:{minutes:02d}"
             else:
                 self.fields['ready_in'].initial = "00:00"
+
+        # 2. CREATE MODE: Pre-fill last used bread_type and ready_in from session
+        elif request:
+            last_bread_type = request.session.get('last_used_bread_type')
+            last_ready_in = request.session.get('last_used_ready_in')
+
+            if last_bread_type:
+                self.fields['bread_type'].initial = last_bread_type
+            if last_ready_in:
+                self.fields['ready_in'].initial = last_ready_in
 
     def clean_ready_in(self):
         data = self.cleaned_data['ready_in'].strip()
@@ -95,6 +108,15 @@ class LoafAdmin(admin.ModelAdmin):
     form = LoafAdminForm
     list_display = ('bread_type', 'machine', 'ready_at', 'is_active')
     list_filter = ('machine',)
+
+    def get_form(self, request, obj=None, **kwargs):
+        # Pass request object into the form's __init__ method
+        form_class = super().get_form(request, obj, **kwargs)
+        class FormWithRequest(form_class):
+            def __new__(cls, *args, **form_kwargs):
+                form_kwargs['request'] = request
+                return form_class(*args, **form_kwargs)
+        return FormWithRequest
 
     def add_view(self, request, form_url='', extra_context=None):
         active_machine_ids = Loaf.objects.filter(
@@ -122,7 +144,6 @@ class LoafAdmin(admin.ModelAdmin):
                 active_loaves = active_loaves.exclude(pk=object_id)
                 
             busy_machine_ids = active_loaves.values_list('machine_id', flat=True)
-
             available_machines = BreadMachine.objects.exclude(id__in=busy_machine_ids)
             kwargs['queryset'] = available_machines
 
@@ -139,9 +160,15 @@ class LoafAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         duration = form.cleaned_data.get('ready_in')
+        raw_ready_in = request.POST.get('ready_in', '').strip()
+
         if duration:
-            # Re-calculate completion target based on time of save + entered duration
             obj.ready_at = timezone.now() + duration
             
+        # Save machine, bread type, and duration into user's session memory
         request.session['last_used_machine_id'] = obj.machine.id
+        request.session['last_used_bread_type'] = obj.bread_type
+        if raw_ready_in:
+            request.session['last_used_ready_in'] = raw_ready_in
+
         super().save_model(request, obj, form, change)
