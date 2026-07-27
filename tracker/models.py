@@ -1,12 +1,32 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
+from PIL import Image
 
 class BreadMachine(models.Model):
     name = models.CharField(max_length=100)  # e.g., "Kitchen Panasonic"
+    image = models.ImageField(upload_to='machines/', blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
     
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        # Save the model first so the file exists on disk
+        super().save(*args, **kwargs)
+
+        # If an image was uploaded, check its dimensions
+        if self.image:
+            img_path = self.image.path
+            img = Image.open(img_path)
+
+            # Define max dimensions (Width, Height)
+            max_size = (800, 800)
+
+            # Resize if either width or height exceeds the limit
+            if img.width > 800 or img.height > 800:
+                # thumbnail() resizes in-place while keeping the original aspect ratio
+                img.thumbnail(max_size, Image.Resampling.LANCZOS)
 
 class Loaf(models.Model):
     machine = models.ForeignKey(BreadMachine, on_delete=models.CASCADE, related_name='loaves')
