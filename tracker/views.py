@@ -1,6 +1,46 @@
-from django.shortcuts import render
 from django.utils import timezone
 from .models import BreadMachine, Loaf
+from .forms import CommentForm
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count
+
+def loaf_detail(request, loaf_id):
+    loaf = get_object_or_404(Loaf, id=loaf_id)
+    comments = loaf.comments.all()  # Fetches all comments for this loaf
+    
+    if request.method == 'POST':
+        # Ensure only logged-in users can post
+        if not request.user.is_authenticated:
+            return redirect('login')
+            
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.loaf = loaf
+            comment.author = request.user
+            comment.save()
+            return redirect('loaf_detail', loaf_id=loaf.id)
+    else:
+        form = CommentForm()
+
+    return render(request, 'loaf_detail.html', {
+        'loaf': loaf,
+        'comments': comments,
+        'form': form
+    })
+
+@login_required
+def add_comment(request, loaf_id):
+    loaf = get_object_or_404(Loaf, id=loaf_id)
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.loaf = loaf
+            comment.author = request.user  # Automatically assigns the logged-in user
+            comment.save()
+    return redirect('loaf_detail', loaf_id=loaf.id)
 
 def public_dashboard(request):
     now = timezone.now()
@@ -9,7 +49,9 @@ def public_dashboard(request):
     active_loaves = Loaf.objects.filter(ready_at__gt=now).select_related('machine')
     
     # History (finished baking)
-    history_loaves = Loaf.objects.filter(ready_at__lte=now).order_by('-ready_at')[:20]
+    history_loaves = Loaf.objects.filter(ready_at__lte=now).annotate(
+        comment_count=Count('comments')
+        ).order_by('-ready_at')[:20]
     
     # Machines currently in use
     active_machine_ids = active_loaves.values_list('machine_id', flat=True)
