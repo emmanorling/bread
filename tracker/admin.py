@@ -6,7 +6,11 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 
-from .models import BreadMachine, Loaf
+from .models import BreadMachine, Loaf, Comment
+
+@admin.register(BreadMachine)
+class BreadMachineAdmin(admin.ModelAdmin):
+    list_display = ('name',)
 
 # Default suggested bread recipes/types
 DEFAULT_BREAD_TYPES = [
@@ -102,10 +106,21 @@ class LoafAdminForm(forms.ModelForm):
             raise forms.ValidationError("Please enter time in HH:MM format (e.g. 03:30).")
 
 
+class CommentInline(admin.TabularInline):
+    model = Comment
+    extra = 1
+    max_num = 1
+
+    verbose_name = "Notes (optional)"
+    verbose_name_plural = "Notes (optional)"
+    exclude = ('author',)
+    readonly_fields = ('created_at',)
+
 # 3. Admin Registrations
 @admin.register(Loaf)
 class LoafAdmin(admin.ModelAdmin):
     form = LoafAdminForm
+    inlines = [CommentInline]
     list_display = ('bread_type', 'machine', 'ready_at', 'is_active')
     list_filter = ('machine',)
 
