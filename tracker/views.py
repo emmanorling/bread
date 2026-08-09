@@ -7,12 +7,13 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 
 def api_bread_status(request):
+    now = timezone.now()
     machines = BreadMachine.objects.all()
     data = []
 
     for machine in machines:
-        # Find active (incomplete) loaf for this machine
-        active_loaf = Loaf.objects.filter(machine=machine, completed=False).first()
+        # Match the dashboard logic: find an active loaf finishing in the future
+        active_loaf = Loaf.objects.filter(machine=machine, ready_at__gt=now).first()
         
         data.append({
             "name": machine.name,
