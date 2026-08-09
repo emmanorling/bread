@@ -25,6 +25,7 @@ urlpatterns = [
     path('', views.public_dashboard, name='dashboard'),
     path('loaf/<int:loaf_id>/', views.loaf_detail, name='loaf_detail'),
     path('api/status/', views.api_bread_status, name='api_bread_status'),
+    path('api/history/', views.api_bread_history, name='api_bread_history'),
 ]
 
 if settings.DEBUG:
