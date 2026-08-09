@@ -1,9 +1,27 @@
 from django.utils import timezone
+from django.http import JsonResponse
 from .models import BreadMachine, Loaf
 from .forms import CommentForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
+
+def api_bread_status(request):
+    machines = BreadMachine.objects.all()
+    data = []
+
+    for machine in machines:
+        # Find active (incomplete) loaf for this machine
+        active_loaf = Loaf.objects.filter(machine=machine, completed=False).first()
+        
+        data.append({
+            "name": machine.name,
+            "status": "Baking" if active_loaf else "Idle",
+            "loaf": active_loaf.bread_type if active_loaf else None,
+            "ready_at": active_loaf.ready_at.strftime("%H:%M") if (active_loaf and active_loaf.ready_at) else None
+        })
+
+    return JsonResponse({"machines": data})
 
 def loaf_detail(request, loaf_id):
     loaf = get_object_or_404(Loaf, id=loaf_id)

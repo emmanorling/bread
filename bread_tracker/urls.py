@@ -22,6 +22,11 @@ from tracker.views import public_dashboard
 from django.conf.urls.static import static
 
 urlpatterns = [
+    # ... existing url paths ...
+    path('api/status/', views.api_bread_status, name='api_bread_status'),
+]
+
+urlpatterns = [
     path('admin/', admin.site.urls),
     path('', public_dashboard, name='dashboard'),
     path('loaf/<int:loaf_id>/', views.loaf_detail, name='loaf_detail'),
