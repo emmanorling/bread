@@ -17,12 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
-from tracker.views import public_dashboard, views
+from tracker import views
 from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', public_dashboard, name='dashboard'),
+    path('', views.public_dashboard, name='dashboard'),
     path('loaf/<int:loaf_id>/', views.loaf_detail, name='loaf_detail'),
     path('api/status/', views.api_bread_status, name='api_bread_status'),
 ]
