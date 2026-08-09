@@ -17,8 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
-from tracker import views
-from tracker.views import public_dashboard
+from tracker.views import public_dashboard views
 from django.conf.urls.static import static
 
 urlpatterns = [
