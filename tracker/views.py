@@ -24,6 +24,21 @@ def api_bread_status(request):
 
     return JsonResponse({"machines": data})
 
+def api_bread_history(request):
+    now = timezone.now()
+    history_loaves = Loaf.objects.filter(ready_at__lte=now).select_related('machine').order_by('-ready_at')[:20]
+    data = []
+
+    for loaf in history_loaves:
+        data.append({
+            "name": loaf.bread_type,
+            "date": loaf.ready_at.strftime("%d %b") if loaf.ready_at else "",
+            "machine": loaf.machine.name if loaf.machine else "Unknown",
+            "notes": getattr(loaf, 'notes', '')  # Uses loaf.notes if field exists
+        })
+        
+    return JsonResponse({"history": data})
+
 def loaf_detail(request, loaf_id):
     loaf = get_object_or_404(Loaf, id=loaf_id)
     comments = loaf.comments.all()  # Fetches all comments for this loaf
