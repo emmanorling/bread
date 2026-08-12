@@ -1,4 +1,5 @@
 from django.utils import timezone
+from django.utils.timezone import localtime
 from django.http import JsonResponse
 from .models import BreadMachine, Loaf
 from .forms import CommentForm
@@ -19,7 +20,7 @@ def api_bread_status(request):
             "name": machine.name,
             "status": "Baking" if active_loaf else "Idle",
             "loaf": active_loaf.bread_type if active_loaf else None,
-            "ready_at": active_loaf.ready_at.strftime("%H:%M") if (active_loaf and active_loaf.ready_at) else None
+            "ready_at": localtime(active_loaf.ready_at).strftime("%H:%M") if (active_loaf and active_loaf.ready_at) else None
         })
 
     return JsonResponse({"machines": data})
@@ -36,7 +37,7 @@ def api_bread_history(request):
 
         data.append({
             "name": loaf.bread_type,
-            "date": loaf.ready_at.strftime("%d %b %H:%M") if loaf.ready_at else "",
+            "date": localtime(loaf.ready_at).strftime("%d %b %H:%M") if loaf.ready_at else "",
             "machine": loaf.machine.name if loaf.machine else "Unknown",
             "notes": notes_summary
         })
