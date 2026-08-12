@@ -30,11 +30,15 @@ def api_bread_history(request):
     data = []
 
     for loaf in history_loaves:
+        # Combine comments into a formatted notes string for the badge
+        comment_texts = [f"{c.author.username}: {c.text}" for c in loaf.comments.all()]
+        notes_summary = "\n".join(comment_texts) if comment_texts else getattr(loaf, 'notes', 'No notes recorded.')
+
         data.append({
             "name": loaf.bread_type,
             "date": loaf.ready_at.strftime("%d %b %H:%M") if loaf.ready_at else "",
             "machine": loaf.machine.name if loaf.machine else "Unknown",
-            "comments": loaf.comments.all()
+            "notes": notes_summary
         })
         
     return JsonResponse({"history": data})
