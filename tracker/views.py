@@ -13,6 +13,35 @@ def api_bread_status(request):
     data = []
 
     for machine in machines:
+        active_loaf = Loaf.objects.filter(machine=machine, ready_at__gt=now).first()
+        
+        ready_str = None
+        if active_loaf and active_loaf.ready_at:
+            diff = active_loaf.ready_at - now
+            total_minutes = int(diff.total_seconds() // 60)
+            
+            if total_minutes <= 0:
+                ready_str = "Ready now"
+            elif total_minutes < 60:
+                ready_str = f"Ready in {total_minutes}m"
+            else:
+                ready_str = f"Ready at {localtime(active_loaf.ready_at).strftime("%H:%M")}"
+
+        data.append({
+            "name": machine.name,
+            "status": "Baking" if active_loaf else "Idle",
+            "loaf": active_loaf.bread_type if active_loaf else None,
+            "ready_at": ready_str  # Returns e.g. "Ready in 45m" or "Ready in 1h 15m"
+        })
+
+    return JsonResponse({"machines": data})
+
+def api_bread_status(request):
+    now = timezone.now()
+    machines = BreadMachine.objects.all()
+    data = []
+
+    for machine in machines:
         # Match the dashboard logic: find an active loaf finishing in the future
         active_loaf = Loaf.objects.filter(machine=machine, ready_at__gt=now).first()
         
