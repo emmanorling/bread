@@ -36,24 +36,6 @@ def api_bread_status(request):
 
     return JsonResponse({"machines": data})
 
-def api_bread_status(request):
-    now = timezone.now()
-    machines = BreadMachine.objects.all()
-    data = []
-
-    for machine in machines:
-        # Match the dashboard logic: find an active loaf finishing in the future
-        active_loaf = Loaf.objects.filter(machine=machine, ready_at__gt=now).first()
-        
-        data.append({
-            "name": machine.name,
-            "status": "Baking" if active_loaf else "Idle",
-            "loaf": active_loaf.bread_type if active_loaf else None,
-            "ready_at": localtime(active_loaf.ready_at).strftime("%H:%M") if (active_loaf and active_loaf.ready_at) else None
-        })
-
-    return JsonResponse({"machines": data})
-
 def api_bread_history(request):
     now = timezone.now()
     history_loaves = Loaf.objects.filter(ready_at__lte=now).select_related('machine').order_by('-ready_at')[:20]
