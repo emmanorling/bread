@@ -34,7 +34,7 @@ def api_bread_history(request):
             "name": loaf.bread_type,
             "date": loaf.ready_at.strftime("%d %b %H:%M") if loaf.ready_at else "",
             "machine": loaf.machine.name if loaf.machine else "Unknown",
-            "notes": getattr(loaf, 'notes', '')  # Uses loaf.notes if field exists
+            "comments": loaf.comments.all()
         })
         
     return JsonResponse({"history": data})
