@@ -26,6 +26,12 @@ urlpatterns = [
     path('loaf/<int:loaf_id>/', views.loaf_detail, name='loaf_detail'),
     path('api/status/', views.api_bread_status, name='api_bread_status'),
     path('api/history/', views.api_bread_history, name='api_bread_history'),
+    path('loaf/add/', views.add_loaf, name='add_loaf'),
+    path('loaf/<int:loaf_id>/edit/', views.edit_loaf, name='edit_loaf'),
+    path('loaf/<int:loaf_id>/delete/', views.delete_loaf, name='delete_loaf'),
+    path('machine/add/', views.add_machine, name='add_machine'),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
+    path('profile/password/', views.change_password, name='change_password'),
 ]
 
 if settings.DEBUG:
