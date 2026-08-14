@@ -2,10 +2,12 @@ from django.utils import timezone
 from django.utils.timezone import localtime
 from django.http import JsonResponse
 from .models import BreadMachine, Loaf
-from .forms import CommentForm
+from .forms import CommentForm, LoafForm, LoafEditForm, BreadMachineForm, UserProfileForm
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import Count
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 
 def api_bread_status(request):
     now = timezone.now()
@@ -80,6 +82,65 @@ def loaf_detail(request, loaf_id):
         'form': form
     })
 
+@permission_required('tracker.add_loaf', raise_exception=True)
+def add_loaf(request):
+    # Get pre-selected machine ID from URL query params (if present)
+    machine_id = request.GET.get('machine_id')
+    initial_data = {}
+    if machine_id:
+        initial_data['machine'] = machine_id
+
+    if request.method == 'POST':
+        form = LoafForm(request.POST)
+        if form.is_valid():
+            loaf = form.save()
+            
+            # Save optional initial note as first comment
+            note_text = form.cleaned_data.get('initial_note')
+            if note_text:
+                Comment.objects.create(
+                    loaf=loaf,
+                    author=request.user,
+                    text=note_text
+                )
+                
+            return redirect('dashboard')
+    else:
+        form = LoafForm(initial=initial_data)  # Pre-selects machine in form
+
+    return render(request, 'loaf_form.html', {'form': form, 'action': 'Start New Loaf'})
+
+@permission_required('tracker.change_loaf', raise_exception=True)
+def edit_loaf(request, loaf_id):
+    loaf = get_object_or_404(Loaf, id=loaf_id)
+    if request.method == 'POST':
+        form = LoafEditForm(request.POST, instance=loaf)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = LoafEditForm(instance=loaf)       
+    return render(request, 'loaf_form.html', {'form': form, 'action': 'Edit Loaf'})
+
+@permission_required('tracker.delete_loaf', raise_exception=True)
+def delete_loaf(request, loaf_id):
+    loaf = get_object_or_404(Loaf, id=loaf_id)
+    if request.method == 'POST':
+        loaf.delete()
+        return redirect('dashboard')
+    return render(request, 'loaf_confirm_delete.html', {'loaf': loaf})
+
+@permission_required('tracker.add_breadmachine', raise_exception=True)
+def add_machine(request):
+    if request.method == 'POST':
+        form = BreadMachineForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = BreadMachineForm()
+    return render(request, 'machine_form.html', {'form': form})
+
 @login_required
 def add_comment(request, loaf_id):
     loaf = get_object_or_404(Loaf, id=loaf_id)
@@ -91,6 +152,33 @@ def add_comment(request, loaf_id):
             comment.author = request.user  # Automatically assigns the logged-in user
             comment.save()
     return redirect('loaf_detail', loaf_id=loaf.id)
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        # Enforce editing ONLY the currently logged-in user (request.user)
+        form = UserProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = UserProfileForm(instance=request.user)
+
+    return render(request, 'profile_form.html', {'form': form})
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Keeps the user logged in after their password changes
+            update_session_auth_hash(request, user)
+            return redirect('dashboard')
+    else:
+        form = PasswordChangeForm(user=request.user)
+
+    return render(request, 'password_change_form.html', {'form': form})
 
 def public_dashboard(request):
     now = timezone.now()
@@ -106,11 +194,15 @@ def public_dashboard(request):
     # Machines currently in use
     active_machine_ids = active_loaves.values_list('machine_id', flat=True)
     all_machines = BreadMachine.objects.all()
+
+    # Check if there is at least one machine free to bake
+    has_idle_machines = all_machines.exclude(id__in=active_machine_ids).exists()
     
     context = {
         'active_loaves': active_loaves,
         'history_loaves': history_loaves,
         'all_machines': all_machines,
         'active_machine_ids': active_machine_ids,
+        'has_idle_machines': has_idle_machines,
     }
     return render(request, 'dashboard.html', context)

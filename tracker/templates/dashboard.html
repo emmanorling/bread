@@ -1,222 +1,113 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Auto-refresh page every 60 seconds -->
     <meta http-equiv="refresh" content="60">
     <title>🍞 Bread Tracker</title>
     
-    <style>
-        /* Mobile-first base styles */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f8f9fa;
-            color: #212529;
-            padding: 16px;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.5;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 16px;
-            margin-bottom: 24px;
-            border-bottom: 2px solid #e9ecef;
-        }
-
-        h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        h2 {
-            font-size: 1.2rem;
-            margin: 24px 0 12px 0;
-            color: #495057;
-        }
-
-        /* Responsive button */
-        .btn-add {
-            display: inline-block;
-            background-color: #2b8a3e;
-            color: white;
-            text-decoration: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            text-align: center;
-        }
-
-        .btn-add:hover {
-            background-color: #2b7a36;
-        }
-
-        /* Machine Grid: 1 column on phones, multi-column on larger screens */
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr; /* Default: Single full-width column for phones */
-            gap: 16px;
-        }
-
-        @media (min-width: 550px) {
-            .grid {
-                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            }
-        }
-
-        /* Machine Cards */
-        .card {
-            border-radius: 12px;
-            padding: 18px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            border: 1px solid #dee2e6;
-            background-color: #ffffff;
-        }
-
-        .card.active {
-            background-color: #f4fce3;
-            border-color: #94d82d;
-        }
-
-        .card.idle {
-            background-color: #f8f9fa;
-            border-color: #e9ecef;
-            color: #868e96;
-        }
-
-        .card h3 {
-            font-size: 1.1rem;
-            margin-bottom: 8px;
-            color: #212529;
-        }
-
-        .loaf-type {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #2b8a3e;
-            margin-bottom: 6px;
-        }
-
-        .time-badge {
-            display: inline-block;
-            background-color: #e6fcf5;
-            color: #0ca678;
-            font-weight: 700;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            margin-top: 4px;
-        }
-
-        /* History List */
-        .history-list {
-            list-style: none;
-            background: white;
-            border-radius: 12px;
-            border: 1px solid #dee2e6;
-            overflow: hidden;
-        }
-
-        .history-item {
-            padding: 14px 16px;
-            border-bottom: 1px solid #f1f3f5;
-            font-size: 0.95rem;
-        }
-
-        .history-item:last-child {
-            border-bottom: none;
-        }
-
-        .history-date {
-            color: #868e96;
-            font-size: 0.85rem;
-            display: block;
-            margin-top: 2px;
-        }
-
-	.comment-count {
-	    background-color: #e9ecef;
-	    color: #495057;
-	    font-size: 0.85em;
-	    padding: 2px 8px;
-	    border-radius: 12px;
-	    margin-left: 8px;
-	    font-weight: bold;
-	}
-
-	.machine-img {
-	    width: 60px;          /* Small thumbnail width */
-	    height: 60px;         /* Small thumbnail height */
-	    object-fit: cover;    /* Ensures image fills 60x60 square cleanly without stretching */
-	    border-radius: 6px;   /* Slight rounded corners */
-	    flex-shrink: 0;       /* Prevents thumbnail from shrinking if space is tight */
-	}
-    </style>
+    <!-- Link external static stylesheet -->
+    <link rel="stylesheet" href="{% static 'tracker/style.css' %}">
 </head>
 
 <body>
 
-    <header style="display: flex; justify-content: space-between; align-items: center;">
+    <header>
         <h1>🍞 Bread Tracker</h1>
-        {% if user.is_authenticated %}
-            <a href="/admin/tracker/loaf/add/">+ Add New Loaf</a>
-        {% else %}
-            <a href="/admin/login/?next=/">Bread Maker Login</a>
-        {% endif %}
+        
+        <div class="header-actions">
+            {% if user.is_authenticated %}
+		<a href="{% url 'edit_profile' %}" class="btn btn-outline">
+		    👤 Profile
+		</a>
+
+                {% if perms.tracker.add_breadmachine %}
+                    <a href="{% url 'add_machine' %}" class="btn btn-outline">+ Add Machine</a>
+                {% endif %}
+                
+		{% if perms.tracker.add_loaf %}
+		    {% if has_idle_machines %}
+			<a href="{% url 'add_loaf' %}" class="btn btn-primary">+ Start New Loaf</a>
+		    {% else %}
+			<button class="btn btn-disabled" disabled title="All machines are currently baking!">
+			    + Start New Loaf (All Busy)
+			</button>
+		    {% endif %}
+		{% endif %}
+		<form action="{% url 'admin:logout' %}?next=/ " method="post" style="display: inline;">
+		    {% csrf_token %}
+		    <button type="submit" class="btn btn-link-subtle" title="Logged in as {{ user.username }}">
+			Logout ({{ user.username }})
+		    </button>
+		</form>
+            {% else %}
+                <a href="/admin/login/?next=/" class="btn btn-outline">Bread Maker Login</a>
+            {% endif %}
+        </div>
     </header>
 
     <h2>Active Machines</h2>
     <div class="grid">
-        {% for machine in all_machines %}
-            <div class="card {% if machine.id in active_machine_ids %}active{% else %}idle{% endif %}">
-		<!-- Display Machine Image if available -->
-		{% if machine.image %}
-		    <img src="{{ machine.image.url }}" alt="{{ machine.name }}" class="machine-img">
+	{% for machine in all_machines %}
+	    <div class="card {% if machine.id in active_machine_ids %}active{% else %}idle{% endif %}">
+		<div class="machine-header">
+		    {% if machine.image %}
+			<img src="{{ machine.image.url }}" alt="{{ machine.name }}" class="machine-img">
+		    {% endif %}
+		    <h3>{{ machine.name }}</h3>
+		</div>
+		
+		{% if machine.id in active_machine_ids %}
+		    <!-- MACHINE IS BUSY -->
+		    {% for loaf in active_loaves %}
+			{% if loaf.machine_id == machine.id %}
+			    <p><strong>Loaf:</strong> {{ loaf.bread_type }}</p>
+			    <p><strong>Ready at:</strong> {{ loaf.ready_at|time:"g:i A" }}</p>
+			    <p><small>Started: {{ loaf.started_at|time:"g:i A" }}</small></p>
+			    
+			    {% if perms.tracker.change_loaf %}
+				<a href="{% url 'edit_loaf' loaf.id %}" class="btn btn-outline btn-sm" style="margin-top: 8px;">Edit Loaf</a>
+			    {% endif %}
+			{% endif %}
+		    {% endfor %}
+		{% else %}
+		    <!-- MACHINE IS IDLE -->
+		    <p><em>Idle / Available</em></p>
+		    
+		    {% if perms.tracker.add_loaf %}
+			<a href="{% url 'add_loaf' %}?machine_id={{ machine.id }}" class="btn btn-secondary btn-sm" style="margin-top: 12px;">
+			    + Start Loaf Here
+			</a>
+		    {% endif %}
 		{% endif %}
-                <h3>{{ machine.name }}</h3>
-                
-                {% for loaf in active_loaves %}
-                    {% if loaf.machine_id == machine.id %}
-                        <p><strong>Loaf:</strong> {{ loaf.bread_type }}</p>
-                        <p><strong>Ready at:</strong> {{ loaf.ready_at|time:"g:i A" }}</p>
-                        <p><small>Started: {{ loaf.started_at|time:"g:i A" }}</small></p>
-                    {% endif %}
-                {% empty %}
-                    {% if machine.id not in active_machine_ids %}
-                        <p><em>Idle / Available</em></p>
-                    {% endif %}
-                {% endfor %}
-            </div>
-        {% endfor %}
+	    </div>
+	{% endfor %}
     </div>
 
     <h2>Baking History</h2>
-    {% for loaf in history_loaves %}
-	<div class="loaf-card">
-	    <a href="{% url 'loaf_detail' loaf.id %}">
-		<strong>{{ loaf.bread_type }}</strong>
-	    </a>
-	    <span> - Ready at {{ loaf.ready_at|date:"H:i" }} on {{ loaf.ready_at|date:"j-m-Y" }}</span>
+    <div class="history-list">
+        {% for loaf in history_loaves %}
+            <div class="history-card">
+                <div>
+                    <a href="{% url 'loaf_detail' loaf.id %}" class="btn btn-outline btn-sm">
+                        {{ loaf.bread_type }}
+                    </a>
+                    <span> - Ready at {{ loaf.ready_at|date:"H:i" }} on {{ loaf.ready_at|date:"j-m-Y" }}</span>
 
-	    <!-- Display Comment Count Badge if comments exist -->
-	    {% if loaf.comment_count > 0 %}
-		<span class="comment-count">
-		    💬 {{ loaf.comment_count }} comment{{ loaf.comments.count|pluralize }}
-		</span>
-	    {% endif %}
-	</div>
-    {% endfor %}
+                    {% if loaf.comment_count > 0 %}
+                        <span class="comment-count">
+                            💬 {{ loaf.comment_count }} comment{{ loaf.comments.count|pluralize }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                {% if perms.tracker.change_loaf %}
+                    <a href="{% url 'edit_loaf' loaf.id %}" class="btn btn-outline btn-sm">Edit</a>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
 
 </body>
 </html>
