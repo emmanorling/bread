@@ -133,7 +133,8 @@ def delete_loaf(request, loaf_id):
 @permission_required('tracker.add_breadmachine', raise_exception=True)
 def add_machine(request):
     if request.method == 'POST':
-        form = BreadMachineForm(request.POST)
+        # Add request.FILES so uploaded photos are saved
+        form = BreadMachineForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect('dashboard')

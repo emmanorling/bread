@@ -1,108 +1,55 @@
-{% extends "admin/base_site.html" %}
-{% load i18n static %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍞 Bread Maker Login</title>
+    <link rel="stylesheet" href="{% static 'tracker/style.css' %}">
+</head>
+<body style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0;">
 
-{% block extrastyle %}
-{{ block.super }}
-<style>
-    /* Clean, modern centered login card */
-    body {
-        background-color: #f8f9fa !important;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-    }
-    #container {
-        background: transparent !important;
-        border: none !important;
-    }
-    #content {
-        max-width: 400px !important;
-        margin: 60px auto !important;
-        padding: 30px !important;
-        background: #ffffff !important;
-        border-radius: 12px !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
-        border: 1px solid #e9ecef !important;
-    }
-    #header, .breadcrumbs {
-        display: none !important; /* Hide ugly top header bar on login */
-    }
-    .form-row {
-        padding: 10px 0 !important;
-        border-bottom: none !important;
-    }
-    .form-row label {
-        font-weight: 600 !important;
-        color: #495057 !important;
-        margin-bottom: 6px !important;
-        display: block !important;
-    }
-    .form-row input[type="text"], 
-    .form-row input[type="password"] {
-        width: 100% !important;
-        padding: 10px 12px !important;
-        border: 1px solid #ced4da !important;
-        border-radius: 6px !important;
-        box-sizing: border-box !important;
-        font-size: 1rem !important;
-    }
-    .submit-row {
-        padding: 20px 0 0 0 !important;
-        margin: 0 !important;
-        background: transparent !important;
-        border: none !important;
-    }
-    .submit-row input {
-        width: 100% !important;
-        background-color: #2b8a3e !important;
-        color: white !important;
-        padding: 12px !important;
-        font-weight: 600 !important;
-        font-size: 1rem !important;
-        border-radius: 6px !important;
-        border: none !important;
-        cursor: pointer !important;
-    }
-    .submit-row input:hover {
-        background-color: #2b7a36 !important;
-    }
-    .login-title {
-        text-align: center;
-        margin-bottom: 20px;
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #212529;
-    }
-</style>
-{% endblock %}
+    <header style="margin-bottom: 24px; text-align: center;">
+        <h1 style="font-size: 2.2rem; margin-bottom: 8px;">🍞 Bread Tracker</h1>
+        <p style="color: #6c757d; margin: 0;">Bread Maker Sign In</p>
+    </header>
 
-{% block content %}
-<div class="login-title">🍞 Bread Tracker Admin</div>
+    <main class="card" style="max-width: 400px; width: 100%; padding: 28px;">
+        
+        <!-- Display Login Errors -->
+        {% if form.errors %}
+            <div style="background-color: #fff5f5; border: 1px solid #ffc9c9; color: #e03131; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem;">
+                Invalid username or password. Please try again.
+            </div>
+        {% endif %}
 
-{% if form.errors and not form.non_field_errors %}
-<p class="errornote">
-{% if form.errors.items|length == 1 %}{% translate "Please correct the error below." %}{% else %}{% translate "Please correct the errors below." %}{% endif %}
-</p>
-{% endif %}
+        <form method="post" action="{{ app_path }}">
+            {% csrf_token %}
+            
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div>
+                    <label for="id_username" style="display: block; font-weight: 600; margin-bottom: 6px;">Username</label>
+                    <input type="text" name="username" id="id_username" required style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box;">
+                </div>
 
-{% if form.non_field_errors %}
-{% for error in form.non_field_errors %}
-<p class="errornote">
-    {{ error }}
-</p>
-{% endfor %}
-{% endif %}
+                <div>
+                    <label for="id_password" style="display: block; font-weight: 600; margin-bottom: 6px;">Password</label>
+                    <input type="password" name="password" id="id_password" required style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box;">
+                </div>
 
-<form action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
-  <div class="form-row">
-    {{ form.username.errors }}
-    {{ form.username.label_tag }} {{ form.username }}
-  </div>
-  <div class="form-row">
-    {{ form.password.errors }}
-    {{ form.password.label_tag }} {{ form.password }}
-    <input type="hidden" name="next" value="{{ next }}">
-  </div>
-  <div class="submit-row">
-    <input type="submit" value="Log in">
-  </div>
-</form>
-{% endblock %}
+                <!-- Preserve the 'next' redirect parameter -->
+                <input type="hidden" name="next" value="{{ next }}">
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px; padding: 12px; font-size: 1rem;">
+                    Log In
+                </button>
+            </div>
+        </form>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{% url 'dashboard' %}" class="btn-link-subtle">← Back to Public Dashboard</a>
+        </div>
+    </main>
+
+</body>
+</html>
