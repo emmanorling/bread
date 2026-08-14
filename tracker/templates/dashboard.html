@@ -93,7 +93,7 @@
                     <a href="{% url 'loaf_detail' loaf.id %}" class="btn btn-outline btn-sm">
                         {{ loaf.bread_type }}
                     </a>
-                    <span> - Ready at {{ loaf.ready_at|date:"H:i" }} on {{ loaf.ready_at|date:"j-m-Y" }}</span>
+                    <span> - Was ready at {{ loaf.ready_at|date:"H:i" }} on {{ loaf.ready_at|date:"j-m-Y" }}</span>
 
                     {% if loaf.comment_count > 0 %}
                         <span class="comment-count">
