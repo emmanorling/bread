@@ -22,11 +22,8 @@ class RestrictAdminMiddleware:
             if not user.is_authenticated:
                 return redirect('dashboard')
 
-            # Check if user is in a "bread maker" / "bread makers" group (case-insensitive)
-            is_bread_maker = user.groups.filter(name__icontains='bread maker').exists()
-
-            # If they are in the bread maker group OR simply not a superuser -> redirect to dashboard
-            if is_bread_maker or not user.is_superuser:
+            # If they are not a superuser -> redirect to dashboard
+            if not user.is_superuser:
                 return redirect('dashboard')
 
         return self.get_response(request)
