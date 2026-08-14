@@ -92,11 +92,19 @@ class LoafEditForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Format existing datetime objects so browser inputs can display them properly
-        if self.instance and self.instance.started_at:
-            self.initial['started_at'] = self.instance.started_at.strftime('%Y-%m-%dT%H:%M')
-        if self.instance and self.instance.ready_at:
-            self.initial['ready_at'] = self.instance.ready_at.strftime('%Y-%m-%dT%H:%M')
+        
+        # Tell Django to accept ISO format input on submission
+        self.fields['started_at'].input_formats = ['%Y-%m-%dT%H:%M']
+        self.fields['ready_at'].input_formats = ['%Y-%m-%dT%H:%M']
+
+        # Convert stored UTC datetimes to local time before formatting for the browser input
+        if self.instance and self.instance.pk:
+            if self.instance.started_at:
+                local_start = timezone.localtime(self.instance.started_at)
+                self.initial['started_at'] = local_start.strftime('%Y-%m-%dT%H:%M')
+            if self.instance.ready_at:
+                local_ready = timezone.localtime(self.instance.ready_at)
+                self.initial['ready_at'] = local_ready.strftime('%Y-%m-%dT%H:%M')
 
 class BreadMachineForm(forms.ModelForm):
     class Meta:
