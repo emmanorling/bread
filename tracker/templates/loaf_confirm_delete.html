@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍞 Delete Loaf</title>
+    <link rel="stylesheet" href="{% static 'tracker/style.css' %}">
+</head>
+<body>
+
+    <header>
+        <h1>🍞 Delete Loaf</h1>
+        <a href="{% url 'dashboard' %}" class="btn btn-outline">← Cancel</a>
+    </header>
+
+    <main class="card" style="max-width: 500px; margin: 0 auto; padding: 24px; text-align: center;">
+        <h3 style="color: #e03131; margin-bottom: 12px;">Delete "{{ loaf.bread_type }}"?</h3>
+        <p style="margin-bottom: 24px; color: #495057;">
+            Are you sure you want to delete this loaf from {{ loaf.machine.name }}? This action cannot be undone.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button type="submit" class="btn btn-primary" style="background-color: #e03131; border-color: #e03131;">
+                    Yes, Delete Loaf
+                </button>
+                <a href="{% url 'dashboard' %}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </main>
+
+</body>
+</html>

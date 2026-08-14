@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍞 Edit Profile</title>
+    <link rel="stylesheet" href="{% static 'tracker/style.css' %}">
+</head>
+<body>
+
+    <header>
+        <h1>🍞 Edit Profile</h1>
+        <a href="{% url 'dashboard' %}" class="btn btn-outline">← Back to Dashboard</a>
+    </header>
+
+    <main class="card" style="max-width: 500px; margin: 0 auto; padding: 24px;">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                {% for field in form %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" style="display: block; font-weight: 600; margin-bottom: 6px;">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div style="color: #e03131; font-size: 0.85rem; margin-top: 4px;">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <div style="display: flex; gap: 12px; margin-top: 12px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Save Profile</button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline">Cancel</a>
+                </div>
+
+		<a href="{% url 'change_password' %}" class="btn btn-outline">
+		    🔒 Change Password
+		</a>
+            </div>
+        </form>
+    </main>
+
+</body>
+</html>
