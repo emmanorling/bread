@@ -34,10 +34,16 @@
 				👤 {{ user.username }} <span class="arrow">▾</span>
 			    </a>
 			    <ul class="dropdown-menu">
-				{% if perms.tracker.add_breadmachine %}
+				{% if user.is_superuser %}
 				    <li>
-					<a href="{% url 'add_machine' %}" class="nav-link">🤖Add Machine</a>
+					<a href="{% url 'admin:index' %}">🛠️ Admin tasks</a>
 				    </li>
+				{% else %}
+				    {% if perms.tracker.add_breadmachine %}
+					<li>
+					    <a href="{% url 'add_machine' %}">🤖 Add Machine</a>
+					</li>
+				    {% endif %}
 				{% endif %}
 
 				<li><a href="{% url 'edit_profile' %}">⚙️ Edit Profile</a></li>
