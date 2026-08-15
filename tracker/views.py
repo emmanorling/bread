@@ -69,6 +69,9 @@ def request_account(request):
             user.is_active = False  # Disabled until admin approves
             user.save()
 
+            # Retrieve the user's explanation
+            reason = form.cleaned_data.get('reason', 'No explanation provided.')
+
             # Add to 'Bread Makers' group
             bread_maker_group, _ = Group.objects.get_or_create(name='Bread Makers')
             user.groups.add(bread_maker_group)
@@ -80,6 +83,9 @@ def request_account(request):
                     subject='🍞 New Bread Maker Account Request',
                     message=(
                         f"New request from {user.first_name} {user.last_name} ({user.username}, {user.email}).\n\n"
+                        f"--- Reason / Notes ---\n"
+                        f"{reason}\n"
+                        f"----------------------\n\n"
                         f"Approve or manage user here: https://{request.get_host()}/admin/auth/user/{user.id}/change/"
                     ),
                     from_email=None,  # Uses DEFAULT_FROM_EMAIL from settings
