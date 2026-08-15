@@ -106,24 +106,29 @@
     <h2>Baking History</h2>
     <div class="history-list">
         {% for loaf in history_loaves %}
-            <div class="history-card">
-                <div>
-                    <a href="{% url 'loaf_detail' loaf.id %}" class="btn btn-outline btn-sm">
-                        {{ loaf.bread_type }}
-                    </a>
-                    <span> - Was ready at {{ loaf.ready_at|date:"H:i" }} on {{ loaf.ready_at|date:"j-m-Y" }}</span>
+	    <div class="history-card">
+		<div>
+		    <strong>{{ loaf.bread_type }}</strong>
+		    <span> - Was ready at {{ loaf.ready_at|date:"H:i" }} on {{ loaf.ready_at|date:"j-m-Y" }}</span>
 
-                    {% if loaf.comment_count > 0 %}
-                        <span class="comment-count">
-                            💬 {{ loaf.comment_count }} comment{{ loaf.comments.count|pluralize }}
-                        </span>
-                    {% endif %}
-                </div>
+		    {% if loaf.comment_count > 0 %}
+			<span class="comment-count">
+			    💬 {{ loaf.comment_count }} comment{{ loaf.comments.count|pluralize }}
+			</span>
+		    {% endif %}
+		</div>
 
-                {% if perms.tracker.change_loaf %}
-                    <a href="{% url 'edit_loaf' loaf.id %}" class="btn btn-outline btn-sm">Edit</a>
-                {% endif %}
-            </div>
+		<div>
+		    <!-- Explicit View / Comment button -->
+		    <a href="{% url 'loaf_detail' loaf.id %}" class="btn btn-outline btn-sm">
+			💬 View / Comment
+		    </a>
+
+		    {% if perms.tracker.change_loaf %}
+			<a href="{% url 'edit_loaf' loaf.id %}" class="btn btn-outline btn-sm">Edit</a>
+		    {% endif %}
+		</div>
+	    </div>
         {% endfor %}
     </div>
 
