@@ -27,6 +27,7 @@ class BreadMachine(models.Model):
             if img.width > 800 or img.height > 800:
                 # thumbnail() resizes in-place while keeping the original aspect ratio
                 img.thumbnail(max_size, Image.Resampling.LANCZOS)
+                img.save(self.image.path)
 
 class Loaf(models.Model):
     machine = models.ForeignKey(BreadMachine, on_delete=models.CASCADE, related_name='loaves')
