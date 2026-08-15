@@ -303,3 +303,41 @@ h2 {
 .btn-login:hover {
     background-color: #1c7ed6;
 }
+
+/* Account Request Callout Box */
+.request-account-box {
+    margin-top: 24px;
+    padding: 18px 16px;
+    background-color: #fef3c7; /* Warm soft amber background */
+    border: 1.5px dashed #f59e0b;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.request-account-box p {
+    font-size: 0.88rem;
+    color: #92400e;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.btn-request {
+    display: block;
+    width: 100%;
+    padding: 10px 16px;
+    background-color: #ffffff;
+    color: #b45309;
+    border: 1.5px solid #d97706;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-request:hover {
+    background-color: #d97706;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
+    transform: translateY(-1px);
+}
