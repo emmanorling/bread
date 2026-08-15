@@ -13,43 +13,57 @@
 
 <body>
 
-    <header>
-        <h1>🍞 Bread Tracker</h1>
-        
-        <div class="header-actions">
-            {% if user.is_authenticated %}
-		<a href="{% url 'edit_profile' %}" class="btn btn-outline">
-		    👤 Profile
-		</a>
+    <header class="navbar">
+	<div class="nav-container">
+	    <!-- Brand / Home Link -->
+	    <a href="{% url 'dashboard' %}" class="nav-brand">
+		🍞 <span>Bread Tracker</span>
+	    </a>
 
-                {% if perms.tracker.add_breadmachine %}
-                    <a href="{% url 'add_machine' %}" class="btn btn-outline">+ Add Machine</a>
-                {% endif %}
-                
-		{% if perms.tracker.add_loaf %}
-		    {% if has_idle_machines %}
-			<a href="{% url 'add_loaf' %}" class="btn btn-primary">+ Start New Loaf</a>
+	    <!-- Menu Links -->
+	    <nav class="nav-menu">
+		<ul class="nav-links">
+		    <li>
+			<a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
+		    </li>
+
+		    {% if user.is_authenticated %}
+			<!-- User Dropdown Menu -->
+			<li class="nav-dropdown">
+			    <a href="#" class="nav-link dropdown-toggle">
+				👤 {{ user.username }} <span class="arrow">▾</span>
+			    </a>
+			    <ul class="dropdown-menu">
+				{% if perms.tracker.add_breadmachine %}
+				    <li>
+					<a href="{% url 'add_machine' %}" class="nav-link">🤖Add Machine</a>
+				    </li>
+				{% endif %}
+
+				<li><a href="{% url 'edit_profile' %}">⚙️ Edit Profile</a></li>
+				<li><a href="{% url 'change_password' %}">🔒 Change Password</a></li>
+				<li class="dropdown-divider"></li>
+				<li>
+				    <form method="post" action="/admin/logout/?next=/" style="margin: 0;">
+					{% csrf_token %}
+					<button type="submit" class="dropdown-btn">🚪 Log Out</button>
+				    </form>
+				</li>
+			    </ul>
+			</li>
 		    {% else %}
-			<button class="btn btn-disabled" disabled title="All machines are currently baking!">
-			    + Start New Loaf (All Busy)
-			</button>
+			<li>
+			    <a href="/admin/login/?next=/">Bread Maker Login</a>
+			</li>
 		    {% endif %}
-		{% endif %}
-		<form action="{% url 'admin:logout' %}?next=/ " method="post" style="display: inline;">
-		    {% csrf_token %}
-		    <button type="submit" class="btn btn-link-subtle" title="Logged in as {{ user.username }}">
-			Logout ({{ user.username }})
-		    </button>
-		</form>
-            {% else %}
-                <a href="/admin/login/?next=/" class="btn btn-outline">Bread Maker Login</a>
-            {% endif %}
-        </div>
+		</ul>
+	    </nav>
+	</div>
     </header>
 
-    <h2>Active Machines</h2>
-    <div class="grid">
-	{% for machine in all_machines %}
+	<h2>Active Machines</h2>
+	<div class="grid">
+	    {% for machine in all_machines %}
 	    <div class="card {% if machine.id in active_machine_ids %}active{% else %}idle{% endif %}">
 		<div class="machine-header">
 		    {% if machine.image %}
@@ -73,12 +87,10 @@
 		    {% endfor %}
 		{% else %}
 		    <!-- MACHINE IS IDLE -->
-		    <p><em>Idle / Available</em></p>
-		    
 		    {% if perms.tracker.add_loaf %}
-			<a href="{% url 'add_loaf' %}?machine_id={{ machine.id }}" class="btn btn-secondary btn-sm" style="margin-top: 12px;">
-			    + Start Loaf Here
-			</a>
+			<a href="{% url 'add_loaf' %}?machine_id={{ machine.id }}"><p><em>Idle / Available</em></p></a>
+		    {% else %}
+			<p><em>Idle / Available</em></p>
 		    {% endif %}
 		{% endif %}
 	    </div>
