@@ -1,4 +1,3 @@
-bread_tracker/settings.py
 *.sqlite3
 db.sqlite3
 # Python compiled files & cache
@@ -6,3 +5,5 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+media/
+.DS_Store

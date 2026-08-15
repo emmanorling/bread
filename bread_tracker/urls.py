@@ -32,6 +32,7 @@ urlpatterns = [
     path('machine/add/', views.add_machine, name='add_machine'),
     path('profile/edit/', views.edit_profile, name='edit_profile'),
     path('profile/password/', views.change_password, name='change_password'),
+    path('request-account/', views.request_account, name='request_account'),
 ]
 
 if settings.DEBUG:

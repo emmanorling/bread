@@ -2,12 +2,15 @@ from django.utils import timezone
 from django.utils.timezone import localtime
 from django.http import JsonResponse
 from .models import BreadMachine, Loaf
-from .forms import CommentForm, LoafForm, LoafEditForm, BreadMachineForm, UserProfileForm
+from .forms import CommentForm, LoafForm, LoafEditForm, BreadMachineForm, UserProfileForm, AccountRequestForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import Count
+from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
+from django.core.mail import send_mail
+from django.contrib.auth.models import User, Group
 
 def api_bread_status(request):
     now = timezone.now()
@@ -56,6 +59,39 @@ def api_bread_history(request):
         })
         
     return JsonResponse({"history": data})
+
+def request_account(request):
+    if request.method == 'POST':
+        form = AccountRequestForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            user.is_active = False  # Disabled until admin approves
+            user.save()
+
+            # Add to 'Bread Makers' group
+            bread_maker_group, _ = Group.objects.get_or_create(name='Bread Makers')
+            user.groups.add(bread_maker_group)
+
+            # Notify Superusers
+            superusers = User.objects.filter(is_superuser=True, email__isnull=False).values_list('email', flat=True)
+            if superusers:
+                send_mail(
+                    subject='🍞 New Bread Maker Account Request',
+                    message=(
+                        f"New request from {user.first_name} {user.last_name} ({user.username}, {user.email}).\n\n"
+                        f"Approve or manage user here: https://{request.get_host()}/admin/auth/user/{user.id}/change/"
+                    ),
+                    from_email=None,  # Uses DEFAULT_FROM_EMAIL from settings
+                    recipient_list=list(superusers),
+                )
+
+            messages.success(request, "Account request submitted! An admin will review and enable your account shortly.")
+            return redirect('dashboard')
+    else:
+        form = AccountRequestForm()
+
+    return render(request, 'account_request.html', {'form': form})
 
 def loaf_detail(request, loaf_id):
     loaf = get_object_or_404(Loaf, id=loaf_id)
