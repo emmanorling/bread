@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>🍞 Request Bread Maker Account</title>
+    <link rel="stylesheet" href="{% static 'tracker/style.css' %}">
+</head>
+<body style="display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0;">
+    <main class="card" style="max-width: 450px; width: 100%; padding: 28px;">
+        <h2>🍞 Request Account</h2>
+        <p style="color: #6c757d; margin-bottom: 20px; font-size: 0.9rem;">
+            Fill out the form below. An admin will review and activate your account.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 4px;">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div style="color: #e03131; font-size: 0.85rem;">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 12px;">Submit Request</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 16px;">
+            <a href="/admin/login/?next=/" class="btn-link-subtle">← Back to Login</a>
+        </div>
+    </main>
+</body>
+</html>
