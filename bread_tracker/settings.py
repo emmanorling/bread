@@ -21,7 +21,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 SECRET_KEY = os.environ.get(
     'DJANGO_SECRET_KEY', 
-    'django-insecure-0iw^mo-#6e1q5vx37e!l4@z6-om$mu4kcx81za!omynrwnmo-p' # Fallback for local runserver
+    'django-insecure-local-dev-key-change-this-for-production-use-only-123456789'
 )
 # Set DEBUG to True in local testing environment
 # When DEBUG is False (production) don't forget to run 'python manage.py collectstatic'
@@ -125,17 +125,25 @@ STATIC_URL = 'static/'
 # Folder where collectstatic will combine files for deployment
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-""" use settings below for production
-# SMTP Settings for production (using Gmail)                                                                                                                      
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'                                                                                                     
-EMAIL_HOST = 'smtp.gmail.com'                                                                                                                                     
-EMAIL_PORT = 587                                                                                                                                                  
-EMAIL_USE_TLS = True                                                                                                                                              
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'e.j.norling@gmail.com')                                                                                      
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')                                                                                                       
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER 
-"""
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    # SMTP Settings for production (using Gmail)
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'e.j.norling@gmail.com')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+    # Other production settings
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
 
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'dashboard'
