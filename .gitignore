@@ -2,6 +2,8 @@
 db.sqlite3
 # Python compiled files & cache
 __pycache__/
+tracker/migrations/
+staticfiles/
 *.pyc
 *.pyo
 *.pyd
