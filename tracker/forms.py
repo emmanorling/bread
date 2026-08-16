@@ -1,9 +1,21 @@
+"""
+forms.py = python script for handling all the forms, all in one place, including:
+    * UserProfileForm
+    * AccountRequestForm
+    * LoafForm
+    * LoafEditForm
+    * BreadMachineForm
+    * CommentForm
+"""
+
+
 import datetime
 from django import forms
 from django.utils import timezone
 from .models import Loaf, BreadMachine, Comment
 from django.contrib.auth.models import User
 
+# Form to allow user to update personal information
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = User
@@ -15,11 +27,13 @@ class UserProfileForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
         }
 
+# Form to request a new account (leads to account creation but not activation)
 class AccountRequestForm(forms.ModelForm):
     first_name = forms.CharField(required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
     last_name = forms.CharField(required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    # New custom field
+
+    # Get them to explain why they want an account, to filter random signups
     reason = forms.CharField(
         label="Please explain who you are / why you need an account",
         required=True,
@@ -47,6 +61,7 @@ class AccountRequestForm(forms.ModelForm):
             raise forms.ValidationError("Passwords do not match.")
         return cleaned_data
 
+# Form to create a new loaf
 class LoafForm(forms.ModelForm):
     ready_in = forms.CharField(
         label="Ready in",
@@ -69,7 +84,7 @@ class LoafForm(forms.ModelForm):
         model = Loaf
         fields = ['machine', 'bread_type']
         widgets = {
-            'bread_type': forms.TextInput(attrs={'placeholder': 'e.g., Sourdough Boule', 'class': 'form-control'}),
+            'bread_type': forms.TextInput(attrs={'placeholder': 'e.g., White loaf', 'class': 'form-control'}),
             'machine': forms.Select(attrs={'class': 'form-control'}),
         }
 
@@ -104,12 +119,14 @@ class LoafForm(forms.ModelForm):
             instance.save()
         return instance
 
+# Form to edit an existing loaf (gives warning if user wasn't the one who started the loaf,
+# but still permits editing)
 class LoafEditForm(forms.ModelForm):
     class Meta:
         model = Loaf
         fields = ['machine', 'bread_type', 'started_at', 'ready_at']
         widgets = {
-            'bread_type': forms.TextInput(attrs={'placeholder': 'e.g., Sourdough Boule', 'class': 'form-control'}),
+            'bread_type': forms.TextInput(attrs={'placeholder': 'e.g., White loaf', 'class': 'form-control'}),
             'machine': forms.Select(attrs={'class': 'form-control'}),
             'started_at': forms.DateTimeInput(
                 format='%Y-%m-%dT%H:%M',
@@ -137,6 +154,7 @@ class LoafEditForm(forms.ModelForm):
                 local_ready = timezone.localtime(self.instance.ready_at)
                 self.initial['ready_at'] = local_ready.strftime('%Y-%m-%dT%H:%M')
 
+# Form to add an additional bread machine to the database
 class BreadMachineForm(forms.ModelForm):
     class Meta:
         model = BreadMachine
@@ -147,6 +165,7 @@ class BreadMachineForm(forms.ModelForm):
             'notes': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Machine details or manual notes...', 'class': 'form-control'}),
         }
 
+# Form to add comments to a loaf
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
