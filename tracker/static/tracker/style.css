@@ -1,6 +1,51 @@
-/* tracker/static/tracker/style.css */
+i/* tracker/static/tracker/style.css */
 
-/* Mobile-first base styles */
+/* ==========================================================================
+   1. Dynamic Theme Variables (Light & Dark)
+   ========================================================================== */
+:root {
+    --bg-main: #f8fafc;
+    --card-bg: #ffffff;
+    --card-idle-bg: #f8f9fa;
+    --card-active-bg: #f4fce3;
+    --card-active-border: #94d82d;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --heading-color: #92400e;
+    --border-color: #cbd5e1;
+    --border-subtle: #e2e8f0;
+    --input-bg: #ffffff;
+    --dropdown-hover: #f1f3f5;
+    --box-warning-bg: #fef3c7;
+    --box-warning-border: #f59e0b;
+    --box-warning-text: #92400e;
+    --link-color: #d97706;
+    --link-hover: #b45309;
+}
+
+[data-theme="dark"] {
+    --bg-main: #0f172a;
+    --card-bg: #1e293b;
+    --card-idle-bg: #111827;
+    --card-active-bg: #142a1a;
+    --card-active-border: #22c55e;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --heading-color: #fbbf24;
+    --border-color: #334155;
+    --border-subtle: #1e293b;
+    --input-bg: #0f172a;
+    --dropdown-hover: #334155;
+    --box-warning-bg: #451a03;
+    --box-warning-border: #b45309;
+    --box-warning-text: #fef3c7;
+    --link-color: #38bdf8;
+    --link-hover: #7dd3fc;
+}
+
+/* ==========================================================================
+   2. Base Styles & General Reset
+   ========================================================================== */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -9,23 +54,24 @@
 
 body {
     font-family: system-ui, -apple-system, sans-serif;
-    background-color: #f8fafc;
-    color: #212529;
+    background-color: var(--bg-main);
+    color: var(--text-main);
     padding: 16px;
     max-width: 900px;
     margin: 0 auto;
     line-height: 1.5;
     min-height: 100vh;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Header & Nav */
+/* Header & Typography */
 header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding-bottom: 16px;
     margin-bottom: 24px;
-    border-bottom: 2px solid #e9ecef;
+    border-bottom: 2px solid var(--border-subtle);
     flex-wrap: wrap;
     gap: 12px;
 }
@@ -33,84 +79,136 @@ header {
 h1 {
     font-size: 1.5rem;
     font-weight: 700;
+    color: var(--text-main);
 }
 
 h2 {
     font-size: 1.2rem;
     margin: 24px 0 12px 0;
-    color: #495057;
+    color: var(--heading-color);
 }
 
-/* Button Component Styles */
-.header-actions {
+/* Theme Toggle Button */
+.btn-theme-toggle {
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+.btn-theme-toggle:hover {
+    background-color: var(--dropdown-hover);
+}
+
+/* ==========================================================================
+   3. Navigation Bar & Dropdown
+   ========================================================================== */
+.navbar {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-subtle);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nav-brand {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+    text-decoration: none;
     display: flex;
     align-items: center;
     gap: 8px;
-    flex-wrap: wrap;
 }
 
-.btn {
-    display: inline-flex;
+.nav-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.9rem;
+    gap: 20px;
+}
+
+.nav-link {
     text-decoration: none;
-    transition: all 0.2s ease-in-out;
-    border: 1px solid transparent;
+    color: var(--text-main);
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.nav-link:hover {
+    background-color: var(--dropdown-hover);
+}
+
+.nav-dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    list-style: none;
+    padding: 8px 0;
+    margin-top: 4px;
+    min-width: 180px;
+    display: none;
+}
+
+.nav-dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu li a,
+.dropdown-btn {
+    display: block;
+    padding: 10px 16px;
+    color: var(--text-main);
+    text-decoration: none;
+    font-size: 0.9rem;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
     cursor: pointer;
 }
 
-.btn-disabled {
-    background-color: #e9ecef;
-    color: #adb5bd !important;
-    border: 1px solid #ced4da;
-    cursor: not-allowed;
-    opacity: 0.7;
+.dropdown-menu li a:hover,
+.dropdown-btn:hover {
+    background-color: var(--dropdown-hover);
 }
 
-.btn-primary {
-    background-color: #d97706;
-    color: #ffffff !important;
-    border-color: #d97706;
+.dropdown-divider {
+    height: 1px;
+    background-color: var(--border-subtle);
+    margin: 6px 0;
 }
 
-.btn-primary:hover {
-    background-color: #b45309;
-    border-color: #b45309;
-}
-
-.btn-secondary {
-    background-color: #2b8a3e;
-    color: #ffffff !important;
-    border-color: #2b8a3e;
-}
-
-.btn-secondary:hover {
-    background-color: #216a30;
-    border-color: #216a30;
-}
-
-.btn-outline {
-    background-color: #ffffff;
-    color: #495057 !important;
-    border-color: #ced4da;
-}
-
-.btn-outline:hover {
-    background-color: #e9ecef;
-    border-color: #adb5bd;
-}
-
-.btn-sm {
-    padding: 4px 10px;
-    font-size: 0.8rem;
-    border-radius: 6px;
-}
-
-/* Machine Grid Layout */
+/* ==========================================================================
+   4. Cards & Grid Layout
+   ========================================================================== */
 .grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -123,24 +221,24 @@ h2 {
     }
 }
 
-/* Machine Cards */
 .card {
     border-radius: 12px;
     padding: 18px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    border: 1px solid #dee2e6;
-    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+    color: var(--text-main);
 }
 
 .card.active {
-    background-color: #f4fce3;
-    border-color: #94d82d;
+    background-color: var(--card-active-bg);
+    border-color: var(--card-active-border);
 }
 
 .card.idle {
-    background-color: #f8f9fa;
-    border-color: #e9ecef;
-    color: #868e96;
+    background-color: var(--card-idle-bg);
+    border-color: var(--border-color);
+    color: var(--text-muted);
 }
 
 .machine-header {
@@ -166,209 +264,54 @@ h2 {
 }
 
 .history-card {
-    background: white;
+    background-color: var(--card-bg);
     border-radius: 10px;
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--border-color);
     padding: 12px 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 8px;
+    color: var(--text-main);
 }
 
 .comment-count {
-    background-color: #e9ecef;
-    color: #495057;
+    background-color: var(--dropdown-hover);
+    color: var(--text-main);
     font-size: 0.85em;
     padding: 2px 8px;
     border-radius: 12px;
     font-weight: bold;
 }
 
-/* Navigation Bar Base */
-.navbar {
-    background-color: #ffffff;
-    border-bottom: 1px solid #e9ecef;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
-.nav-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 20px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.nav-brand {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #212529;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* Nav Items */
-.nav-links {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.nav-link {
-    text-decoration: none;
-    color: #495057;
-    font-weight: 500;
-    font-size: 0.95rem;
-    padding: 8px 12px;
-    border-radius: 6px;
-    transition: background-color 0.2s, color 0.2s;
-}
-
-.nav-link:hover {
-    background-color: #f8f9fa;
-    color: #212529;
-}
-
-/* Dropdown Styling */
-.nav-dropdown {
-    position: relative;
-}
-
-.dropdown-menu {
-    position: absolute;
-    right: 0;
-    top: 100%;
-    background-color: #ffffff;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    list-style: none;
-    padding: 8px 0;
-    margin-top: 4px;
-    min-width: 180px;
-    display: none; /* Hidden by default */
-}
-
-/* Show dropdown on hover */
-.nav-dropdown:hover .dropdown-menu {
-    display: block;
-}
-
-.dropdown-menu li a,
-.dropdown-btn {
-    display: block;
-    padding: 10px 16px;
-    color: #333;
-    text-decoration: none;
-    font-size: 0.9rem;
-    width: 100%;
-    text-align: left;
-    background: none;
-    border: none;
-    cursor: pointer;
-}
-
-.dropdown-menu li a:hover,
-.dropdown-btn:hover {
-    background-color: #f1f3f5;
-}
-
-.dropdown-divider {
-    height: 1px;
-    background-color: #e9ecef;
-    margin: 6px 0;
-}
-
-/* Login Button */
-.btn-login {
-    background-color: #228be6;
-    color: white;
-    padding: 8px 16px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.9rem;
-}
-
-.btn-login:hover {
-    background-color: #1c7ed6;
-}
-
-/* Account Request Callout Box */
-.request-account-box {
-    margin-top: 24px;
-    padding: 18px 16px;
-    background-color: #fef3c7; /* Warm soft amber background */
-    border: 1.5px dashed #f59e0b;
-    border-radius: 10px;
-    text-align: center;
-}
-
-.request-account-box p {
-    font-size: 0.88rem;
-    color: #92400e;
-    margin-bottom: 10px;
-    font-weight: 600;
-}
-
-.btn-request {
-    display: block;
-    width: 100%;
-    padding: 10px 16px;
-    background-color: #ffffff;
-    color: #b45309;
-    border: 1.5px solid #d97706;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    text-decoration: none;
-    transition: all 0.2s ease-in-out;
-}
-
-.btn-request:hover {
-    background-color: #d97706;
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
-    transform: translateY(-1px);
-}
-
-/* Core Layout & Page Structure */
+/* ==========================================================================
+   5. Form Components & Cards
+   ========================================================================== */
 .form-card {
-    background: #ffffff;
+    background-color: var(--card-bg);
     width: 100%;
     max-width: 500px;
     padding: 24px;
     border-radius: 12px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     box-sizing: border-box;
-    margin: 40px auto; /* Centers forms and detail cards */
+    margin: 40px auto;
+    color: var(--text-main);
 }
 
 .form-card h2 {
     margin: 0 0 20px 0;
-    color: #92400e;
+    color: var(--heading-color);
 }
 
 .form-card p.subtitle {
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 0.9rem;
     margin: -12px 0 20px 0;
 }
 
-/* Form Controls & Labels */
 .form-group {
     margin-bottom: 16px;
 }
@@ -377,7 +320,7 @@ h2 {
     display: block;
     font-weight: 600;
     margin-bottom: 6px;
-    color: #1e293b;
+    color: var(--text-main);
     font-size: 0.95rem;
 }
 
@@ -391,12 +334,12 @@ h2 {
 .form-card textarea {
     width: 100%;
     padding: 12px;
-    border: 1.5px solid #cbd5e1;
+    border: 1.5px solid var(--border-color);
     border-radius: 8px;
     font-size: 1rem;
     box-sizing: border-box;
-    background-color: #ffffff;
-    color: #1e293b;
+    background-color: var(--input-bg);
+    color: var(--text-main);
 }
 
 .form-control:focus,
@@ -405,29 +348,62 @@ h2 {
 .form-card textarea:focus {
     border-color: #d97706;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2);
 }
 
 .field-error {
-    color: #dc2626;
+    color: #ef4444;
     font-size: 0.85rem;
     margin-top: 4px;
 }
 
 .help-text {
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 0.85rem;
     margin-top: 6px;
     display: block;
     line-height: 1.4;
 }
 
-.help-text ul {
-    margin: 4px 0 0 18px;
-    padding: 0;
+/* Special Account Request Box */
+.request-account-box {
+    margin-top: 24px;
+    padding: 18px 16px;
+    background-color: var(--box-warning-bg);
+    border: 1.5px dashed var(--box-warning-border);
+    border-radius: 10px;
+    text-align: center;
 }
 
-/* Button & Action Layouts */
+.request-account-box p {
+    font-size: 0.88rem;
+    color: var(--box-warning-text);
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.btn-request {
+    display: block;
+    width: 100%;
+    padding: 10px 16px;
+    background-color: var(--card-bg);
+    color: var(--heading-color);
+    border: 1.5px solid var(--box-warning-border);
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-request:hover {
+    background-color: #d97706;
+    color: #ffffff;
+}
+
+/* ==========================================================================
+   6. Buttons & Actions
+   ========================================================================== */
 .actions-group {
     display: flex;
     flex-wrap: wrap;
@@ -435,13 +411,6 @@ h2 {
     align-items: center;
     justify-content: space-between;
     margin-top: 20px;
-}
-
-.primary-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    flex: 1;
 }
 
 .btn-submit {
@@ -468,8 +437,8 @@ h2 {
     justify-content: center;
     padding: 12px 20px;
     background-color: transparent;
-    color: #64748b;
-    border: 1.5px solid #cbd5e1;
+    color: var(--text-muted);
+    border: 1.5px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.95rem;
     font-weight: 500;
@@ -478,91 +447,55 @@ h2 {
 }
 
 .btn-cancel:hover {
-    background-color: #f1f5f9;
-    color: #1e293b;
+    background-color: var(--dropdown-hover);
+    color: var(--text-main);
 }
 
-.btn-delete {
-    display: inline-flex;
-    align-items: center;
-    padding: 10px 14px;
-    background-color: #fef2f2;
-    color: #dc2626;
-    border: 1.5px solid #fca5a5;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s ease;
+.btn-outline {
+    background-color: var(--card-bg);
+    color: var(--text-main) !important;
+    border: 1px solid var(--border-color);
 }
 
-.btn-delete:hover {
-    background-color: #dc2626;
-    color: #ffffff;
-}
-
-.btn-secondary-link {
-    display: block;
-    width: 100%;
-    text-align: center;
-    padding: 10px;
-    margin-top: 16px;
-    background-color: #f1f5f9;
-    color: #475569;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-decoration: none;
-    box-sizing: border-box;
-    transition: all 0.2s ease;
-}
-
-.btn-secondary-link:hover {
-    background-color: #e2e8f0;
-    color: #0f172a;
+.btn-outline:hover {
+    background-color: var(--dropdown-hover);
 }
 
 .back-link {
     display: inline-block;
-    color: #64748b;
+    color: var(--text-muted);
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 500;
 }
 
 .back-link:hover {
-    color: #1e293b;
+    color: var(--text-main);
 }
 
-/* Loaf Detail & Comments Component */
+/* ==========================================================================
+   7. Comments
+   ========================================================================== */
 .comment-card {
-    background: #f8fafc;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
     border-left: 4px solid #d97706;
     border-radius: 6px;
     padding: 12px 16px;
     margin-bottom: 12px;
 }
 
-.comment-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-    font-size: 0.88rem;
-}
-
 .comment-author {
     font-weight: 600;
-    color: #1e293b;
+    color: var(--text-main);
 }
 
 .comment-time {
-    color: #64748b;
+    color: var(--text-muted);
 }
 
 .comment-body {
-    color: #334155;
+    color: var(--text-main);
     font-size: 0.95rem;
     margin: 0;
     line-height: 1.4;
@@ -570,6 +503,27 @@ h2 {
 
 .divider {
     border: 0;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--border-subtle);
     margin: 24px 0;
+}
+
+/* ==========================================================================
+   8. Links & Status Overrides
+   ========================================================================== */
+a, 
+a:visited {
+    color: var(--link-color);
+    text-decoration: underline;
+}
+
+a:hover {
+    color: var(--link-hover);
+}
+
+/* Ensure links inside machine cards override browser visited/default colors */
+.card a,
+.card a:visited,
+.card.idle a,
+.card.idle a:visited {
+    color: var(--link-color) !important;
 }

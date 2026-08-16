@@ -6,6 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}🍞 Bread Tracker{% endblock %}</title>
     
+    <!-- Instant theme initialization (prevents screen flashing) -->
+    <script>
+        const savedTheme = localStorage.getItem('theme') || 
+            (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+
     <link rel="stylesheet" href="{% static 'tracker/style.css' %}?v=4">
     {% block extra_head %}{% endblock %}
 </head>
@@ -21,6 +28,12 @@
 
             <nav class="nav-menu">
                 <ul class="nav-links">
+		    <li>
+                        <!-- Theme Toggle Button -->
+                        <button id="theme-toggle" class="btn-theme-toggle" title="Toggle Light/Dark Mode" aria-label="Toggle Theme">
+                            🌙
+                        </button>
+                    </li>
                     <li>
                         <a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
                     </li>
@@ -65,6 +78,25 @@
         {% block content %}
         {% endblock %}
     </main>
+
+    <script>
+        const toggleBtn = document.getElementById('theme-toggle');
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        
+        // Set initial button icon
+        if (toggleBtn) {
+            toggleBtn.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+
+            toggleBtn.addEventListener('click', () => {
+                const activeTheme = document.documentElement.getAttribute('data-theme');
+                const nextTheme = activeTheme === 'dark' ? 'light' : 'dark';
+                
+                document.documentElement.setAttribute('data-theme', nextTheme);
+                localStorage.setItem('theme', nextTheme);
+                toggleBtn.textContent = nextTheme === 'dark' ? '☀️' : '🌙';
+            });
+        }
+    </script>
 
     {% if messages %}
         <script>
