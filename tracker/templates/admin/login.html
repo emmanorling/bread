@@ -1,63 +1,51 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍞 Bread Maker Login</title>
-    <link rel="stylesheet" href="{% static 'tracker/style.css' %}">
-</head>
-<body style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0;">
+{% extends "base.html" %}
 
-    <header style="margin-bottom: 24px; text-align: center;">
-        <h1 style="font-size: 2.2rem; margin-bottom: 8px;">🍞 Bread Tracker</h1>
-        <p style="color: #6c757d; margin: 0;">Bread Maker Sign In</p>
-    </header>
+{% block title %}🍞 Bread Maker Login - Bread Tracker{% endblock %}
 
-    <main class="card" style="max-width: 400px; width: 100%; padding: 28px;">
-        
-        <!-- Display Login Errors -->
-        {% if form.errors %}
-            <div style="background-color: #fff5f5; border: 1px solid #ffc9c9; color: #e03131; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem;">
-                Invalid username or password. Please try again.
-            </div>
-        {% endif %}
+<!-- Override navbar block with empty content to suppress it -->
+{% block navbar %}{% endblock %}
 
-        <form method="post" action="{{ app_path }}">
-            {% csrf_token %}
-            
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-                <div>
-                    <label for="id_username" style="display: block; font-weight: 600; margin-bottom: 6px;">Username</label>
-                    <input type="text" name="username" id="id_username" required style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box;">
-                </div>
+{% block content %}
+<div class="form-card">
+    <h2 style="margin: 0 0 8px 0; color: #92400e;">🍞 Bread Maker Sign In</h2>
+    <p class="subtitle">Log in to manage machines and schedule bakes</p>
 
-                <div>
-                    <label for="id_password" style="display: block; font-weight: 600; margin-bottom: 6px;">Password</label>
-                    <input type="password" name="password" id="id_password" required style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box;">
-                </div>
-
-                <!-- Preserve the 'next' redirect parameter -->
-                <input type="hidden" name="next" value="{{ next }}">
-
-                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px; padding: 12px; font-size: 1rem;">
-                    Log In
-                </button>
-            </div>
-        </form>
-
-	<div class="request-account-box">
-	    <p>Don't have an account?</p>
-	    <p>Need access to schedule bakes?</p>
-	    <a href="{% url 'request_account' %}" class="btn-request">
-		🍞 Request Bread Maker Account
-	    </a>
-	</div>
-
-        <div style="text-align: center; margin-top: 20px;">
-            <a href="{% url 'dashboard' %}" class="btn-link-subtle">← Back to Public Dashboard</a>
+    {% if form.errors %}
+        <div style="background-color: #fff5f5; border: 1px solid #ffc9c9; color: #e03131; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem;">
+            Invalid username or password. Please try again.
         </div>
-    </main>
+    {% endif %}
 
-</body>
-</html>
+    <form method="post" action="{{ app_path }}">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="id_username">Username</label>
+            <input type="text" name="username" id="id_username" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="id_password">Password</label>
+            <input type="password" name="password" id="id_password" class="form-control" required>
+        </div>
+
+        <input type="hidden" name="next" value="{{ next }}">
+
+        <button type="submit" class="btn-submit" style="width: 100%; margin-top: 8px;">
+            Log In
+        </button>
+    </form>
+
+    <div class="request-account-box">
+        <p>Don't have an account?</p>
+        <p>Need access to schedule bakes?</p>
+        <a href="{% url 'request_account' %}" class="btn-request">
+            🍞 Request Bread Maker Account
+        </a>
+    </div>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="{% url 'dashboard' %}" class="back-link">← Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

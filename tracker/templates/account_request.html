@@ -1,38 +1,33 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <!-- Viewport tag scales the page properly on mobile screens -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍞 Request Bread Maker Account</title>
-    <link rel="stylesheet" href="{% static 'tracker/style.css' %}?v=2">
-</head>
-<body>
-    <main class="request-card">
-        <h2 style="margin: 0 0 6px 0; color: #92400e;">🍞 Request Account</h2>
-        <p style="color: #64748b; font-size: 0.9rem; margin: 0 0 20px 0;">
-            Fill out the form below. An admin will review and if approved, will activate your account.
-        </p>
+{% extends "base.html" %}
 
-        <form method="post">
-            {% csrf_token %}
-            {% for field in form %}
-                <div class="form-group">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <div style="color: #dc2626; font-size: 0.85rem; margin-top: 4px;">{{ field.errors.0 }}</div>
-                    {% endif %}
-                </div>
-            {% endfor %}
+{% block title %}🍞 Request Bread Maker Account - Bread Tracker{% endblock %}
 
+<!-- Suppress navbar to match login flow -->
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h2 style="margin: 0 0 6px 0; color: #92400e;">🍞 Request Account</h2>
+    <p class="subtitle">
+        Fill out the form below. An admin will review and activate your account.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <div class="field-error">{{ field.errors.0 }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <div class="actions-group">
             <button type="submit" class="btn-submit">Submit Request</button>
-        </form>
-
-        <div style="text-align: center; margin-top: 20px;">
-            <a href="/admin/login/?next=/" class="back-link">← Back to Login</a>
+            <a href="/admin/login/?next=/" class="btn-cancel">Cancel</a>
         </div>
-    </main>
-</body>
-</html>
+    </form>
+</div>
+{% endblock %}

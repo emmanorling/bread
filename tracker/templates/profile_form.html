@@ -1,37 +1,31 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍞 Edit Profile - Bread Tracker</title>
-    <link rel="stylesheet" href="{% static 'tracker/style.css' %}?v=2">
-</head>
-<body>
-    <main class="form-card">
-        <h2 style="margin: 0 0 20px 0; color: #92400e;">⚙️ Edit Profile</h2>
+{% extends "base.html" %}
 
-        <form method="post">
-            {% csrf_token %}
-            {% for field in form %}
-                <div class="form-group">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <div style="color: #dc2626; font-size: 0.85rem; margin-top: 4px;">{{ field.errors.0 }}</div>
-                    {% endif %}
-                </div>
-            {% endfor %}
+{% block title %}⚙️ Edit Profile - Bread Tracker{% endblock %}
 
-            <div class="actions-group">
-                <button type="submit" class="btn-submit">Save Profile</button>
-                <a href="{% url 'dashboard' %}" class="btn-cancel">Cancel</a>
+{% block content %}
+<div class="form-card">
+    <h2 style="margin: 0 0 20px 0; color: #92400e;">⚙️ Edit Profile</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <div style="color: #dc2626; font-size: 0.85rem; margin-top: 4px;">{{ field.errors.0 }}</div>
+                {% endif %}
             </div>
+        {% endfor %}
 
-            <a href="{% url 'change_password' %}" class="btn-secondary-link">
-                🔒 Change Password
-            </a>
-        </form>
-    </main>
-</body>
-</html>
+        <div class="actions-group">
+            <button type="submit" class="btn-submit">Save Profile</button>
+            <a href="{% url 'dashboard' %}" class="btn-cancel">Cancel</a>
+        </div>
+
+        <a href="{% url 'change_password' %}" class="btn-secondary-link">
+            🔒 Change Password
+        </a>
+    </form>
+</div>
+{% endblock %}

@@ -1,111 +1,47 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="60">
-    <title>🍞 Bread Tracker</title>
-    
-    <!-- Link external static stylesheet -->
-    <link rel="stylesheet" href="{% static 'tracker/style.css' %}?v=2">
-</head>
+{% extends "base.html" %}
 
-<body>
+{% block title %}Dashboard - Bread Tracker{% endblock %}
 
-    <header class="navbar">
-	<div class="nav-container">
-	    <!-- Brand / Home Link -->
-	    <a href="{% url 'dashboard' %}" class="nav-brand">
-		🍞 <span>Bread Tracker</span>
-	    </a>
-
-	    <!-- Menu Links -->
-	    <nav class="nav-menu">
-		<ul class="nav-links">
-		    <li>
-			<a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
-		    </li>
-
-		    {% if user.is_authenticated %}
-			<!-- User Dropdown Menu -->
-			<li class="nav-dropdown">
-			    <a href="#" class="nav-link dropdown-toggle">
-				👤 {{ user.username }} <span class="arrow">▾</span>
-			    </a>
-			    <ul class="dropdown-menu">
-				{% if user.is_superuser %}
-				    <li>
-					<a href="{% url 'admin:index' %}">🛠️ Admin tasks</a>
-				    </li>
-				{% else %}
-				    {% if perms.tracker.add_breadmachine %}
-					<li>
-					    <a href="{% url 'add_machine' %}">🤖 Add Machine</a>
-					</li>
-				    {% endif %}
-				{% endif %}
-
-				<li><a href="{% url 'edit_profile' %}">⚙️ Edit Profile</a></li>
-				<li><a href="{% url 'change_password' %}">🔒 Change Password</a></li>
-				<li class="dropdown-divider"></li>
-				<li>
-				    <form method="post" action="/admin/logout/?next=/" style="margin: 0;">
-					{% csrf_token %}
-					<button type="submit" class="dropdown-btn">🚪 Log Out</button>
-				    </form>
-				</li>
-			    </ul>
-			</li>
-		    {% else %}
-			<li>
-			    <a href="/admin/login/?next=/">Bread Maker Login</a>
-			</li>
-		    {% endif %}
-		</ul>
-	    </nav>
-	</div>
-    </header>
-
-	<h2>Active Machines</h2>
-	<div class="grid">
-	    {% for machine in all_machines %}
-	    <div class="card {% if machine.id in active_machine_ids %}active{% else %}idle{% endif %}">
-		<div class="machine-header">
-		    {% if machine.image %}
-			<img src="{{ machine.image.url }}" alt="{{ machine.name }}" class="machine-img">
-		    {% endif %}
-		    <h3>{{ machine.name }}</h3>
-		</div>
-		
-		{% if machine.id in active_machine_ids %}
-		    <!-- MACHINE IS BUSY -->
-		    {% for loaf in active_loaves %}
-			{% if loaf.machine_id == machine.id %}
-			    <p><strong>Loaf:</strong> {{ loaf.bread_type }}</p>
-			    <p><strong>Ready at:</strong> {{ loaf.ready_at|time:"g:i A" }}</p>
-			    <p><small>Started: {{ loaf.started_at|time:"g:i A" }}</small></p>
-			    
-			    {% if perms.tracker.change_loaf %}
-				<a href="{% url 'edit_loaf' loaf.id %}" class="btn btn-outline btn-sm" style="margin-top: 8px;">Edit Loaf</a>
-			    {% endif %}
-			{% endif %}
-		    {% endfor %}
-		{% else %}
-		    <!-- MACHINE IS IDLE -->
-		    {% if perms.tracker.add_loaf %}
-			<a href="{% url 'add_loaf' %}?machine_id={{ machine.id }}"><p><em>Idle / Available</em></p></a>
-		    {% else %}
-			<p><em>Idle / Available</em></p>
-		    {% endif %}
+{% block content %}
+    <h2>Active Machines</h2>
+    <div class="grid">
+	{% for machine in all_machines %}
+	<div class="card {% if machine.id in active_machine_ids %}active{% else %}idle{% endif %}">
+	    <div class="machine-header">
+		{% if machine.image %}
+		    <img src="{{ machine.image.url }}" alt="{{ machine.name }}" class="machine-img">
 		{% endif %}
+		<h3>{{ machine.name }}</h3>
 	    </div>
+	    
+	    {% if machine.id in active_machine_ids %}
+		<!-- MACHINE IS BUSY -->
+		{% for loaf in active_loaves %}
+		    {% if loaf.machine_id == machine.id %}
+			<p><strong>Loaf:</strong> {{ loaf.bread_type }}</p>
+			<p><strong>Ready at:</strong> {{ loaf.ready_at|time:"g:i A" }}</p>
+			<p><small>Started: {{ loaf.started_at|time:"g:i A" }}</small></p>
+			
+			{% if perms.tracker.change_loaf %}
+			    <a href="{% url 'edit_loaf' loaf.id %}" class="btn btn-outline btn-sm" style="margin-top: 8px;">Edit Loaf</a>
+			{% endif %}
+		    {% endif %}
+		{% endfor %}
+	    {% else %}
+		<!-- MACHINE IS IDLE -->
+		{% if perms.tracker.add_loaf %}
+		    <a href="{% url 'add_loaf' %}?machine_id={{ machine.id }}"><p><em>Idle / Available</em></p></a>
+		{% else %}
+		    <p><em>Idle / Available</em></p>
+		{% endif %}
+	    {% endif %}
+	</div>
 	{% endfor %}
     </div>
 
     <h2>Baking History</h2>
     <div class="history-list">
-        {% for loaf in history_loaves %}
+	{% for loaf in history_loaves %}
 	    <div class="history-card">
 		<div>
 		    <strong>{{ loaf.bread_type }}</strong>
@@ -129,8 +65,6 @@
 		    {% endif %}
 		</div>
 	    </div>
-        {% endfor %}
+	{% endfor %}
     </div>
-
-</body>
-</html>
+{% endblock %}

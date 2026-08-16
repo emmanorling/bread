@@ -1,39 +1,33 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍞 Add Bread Machine - Bread Tracker</title>
-    <link rel="stylesheet" href="{% static 'tracker/style.css' %}?v=2">
-</head>
-<body>
-    <main class="form-card">
-        <h2 style="margin: 0 0 20px 0; color: #92400e;">🍞 Add Bread Machine</h2>
+{% extends "base.html" %}
 
-        <!-- enctype="multipart/form-data" is preserved for photo uploads -->
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            {% for field in form %}
-                <div class="form-group">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    
-                    {% if field.help_text %}
-                        <small class="help-text">{{ field.help_text }}</small>
-                    {% endif %}
-                    
-                    {% if field.errors %}
-                        <div style="color: #dc2626; font-size: 0.85rem; margin-top: 4px;">{{ field.errors.0 }}</div>
-                    {% endif %}
-                </div>
-            {% endfor %}
+{% block title %}🍞 Add Bread Machine - Bread Tracker{% endblock %}
 
-            <div class="actions-group">
-                <button type="submit" class="btn-submit">Save Machine</button>
-                <a href="{% url 'dashboard' %}" class="btn-cancel">Cancel</a>
+{% block content %}
+<div class="form-card">
+    <h2 style="margin: 0 0 20px 0; color: #92400e;">🍞 Add Bread Machine</h2>
+
+    <!-- enctype="multipart/form-data" is required for image file uploads -->
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                
+                {% if field.help_text %}
+                    <small class="help-text">{{ field.help_text }}</small>
+                {% endif %}
+                
+                {% if field.errors %}
+                    <div style="color: #dc2626; font-size: 0.85rem; margin-top: 4px;">{{ field.errors.0 }}</div>
+                {% endif %}
             </div>
-        </form>
-    </main>
-</body>
-</html>
+        {% endfor %}
+
+        <div class="actions-group">
+            <button type="submit" class="btn-submit">Save Machine</button>
+            <a href="{% url 'dashboard' %}" class="btn-cancel">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

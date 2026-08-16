@@ -1,55 +1,49 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍞 {{ loaf.bread_type }} - Bread Tracker</title>
-    <link rel="stylesheet" href="{% static 'tracker/style.css' %}?v=3">
-</head>
-<body>
-    <main class="form-card">
-        <a href="{% url 'dashboard' %}" class="back-link" style="margin-bottom: 16px;">← Back to Dashboard</a>
+{% extends "base.html" %}
 
-        <h2>🍞 {{ loaf.bread_type }}</h2>
-        <p class="subtitle">
-            <strong>Machine:</strong> {{ loaf.machine.name }}<br>
-            <strong>Completed:</strong> {{ loaf.ready_at|date:"M d, Y H:i" }}
-        </p>
+{% block title %}🍞 {{ loaf.bread_type }} - Bread Tracker{% endblock %}
 
-        <h3 style="font-size: 1.05rem; color: #1e293b; margin-bottom: 12px;">Comments & Notes</h3>
+{% block content %}
+<div class="form-card">
+    <a href="{% url 'dashboard' %}" class="back-link" style="margin-bottom: 16px;">← Back to Dashboard</a>
 
-        {% for comment in comments %}
-            <div class="comment-card">
-                <div class="comment-header">
-                    <span class="comment-author">{{ comment.author.username }}</span>
-                    <span class="comment-time">{{ comment.created_at|date:"M d, Y H:i" }}</span>
-                </div>
-                <p class="comment-body">{{ comment.text }}</p>
+    <h2>🍞 {{ loaf.bread_type }}</h2>
+    <p class="subtitle">
+        <strong>Machine:</strong> {{ loaf.machine.name }}<br>
+        <strong>Completed:</strong> {{ loaf.ready_at|date:"M d, Y H:i" }}
+    </p>
+
+    <h3 style="font-size: 1.05rem; color: #1e293b; margin-bottom: 12px;">Comments & Notes</h3>
+
+    {% for comment in comments %}
+        <div class="comment-card">
+            <div class="comment-header">
+                <span class="comment-author">{{ comment.author.username }}</span>
+                <span class="comment-time">{{ comment.created_at|date:"M d, Y H:i" }}</span>
             </div>
-        {% empty %}
-            <p style="color: #64748b; font-size: 0.9rem;">No comments on this loaf yet.</p>
-        {% endfor %}
+            <p class="comment-body">{{ comment.text }}</p>
+        </div>
+    {% empty %}
+        <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 16px;">No comments on this loaf yet.</p>
+    {% endfor %}
 
-        <hr class="divider">
+    <hr class="divider">
 
-        {% if user.is_authenticated %}
-            <h4 style="margin: 0 0 12px 0; color: #1e293b;">Add a Comment</h4>
-            <form method="post">
-                {% csrf_token %}
-                <div class="form-group">
-                    {{ form.text }}
-                    {% if form.text.errors %}
-                        <div class="field-error">{{ form.text.errors.0 }}</div>
-                    {% endif %}
-                </div>
-                <button type="submit" class="btn-submit">Submit Comment</button>
-            </form>
-        {% else %}
-            <p style="color: #64748b; font-size: 0.9rem; text-align: center;">
-                <a href="/admin/login/?next={{ request.path }}" class="back-link" style="color: #d97706; font-weight: 600;">Log in</a> to leave a comment on this bake.
-            </p>
-        {% endif %}
-    </main>
-</body>
-</html>
+    {% if user.is_authenticated %}
+        <h4 style="margin: 0 0 12px 0; color: #1e293b;">Add a Comment</h4>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ form.text }}
+                {% if form.text.errors %}
+                    <div class="field-error">{{ form.text.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <button type="submit" class="btn-submit">Submit Comment</button>
+        </form>
+    {% else %}
+        <p style="color: #64748b; font-size: 0.9rem; text-align: center;">
+            <a href="/admin/login/?next={{ request.path }}" class="back-link" style="color: #d97706; font-weight: 600;">Log in</a> to leave a comment on this bake.
+        </p>
+    {% endif %}
+</div>
+{% endblock %}

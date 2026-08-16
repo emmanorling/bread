@@ -1,45 +1,25 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍞 {{ action|default:"Start New Loaf" }} - Bread Tracker</title>
-    <link rel="stylesheet" href="{% static 'tracker/style.css' %}?v=2">
-</head>
-<body>
-    <main class="form-card">
-        <h2>🍞 {{ action|default:"Start New Loaf" }}</h2>
+{% extends "base.html" %}
 
-        <form method="post">
-            {% csrf_token %}
-            {% for field in form %}
-                <div class="form-group">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.help_text %}
-                        <small class="help-text">{{ field.help_text|safe }}</small>
-                    {% endif %}
-                    {% if field.errors %}
-                        <div class="field-error">{{ field.errors.0 }}</div>
-                    {% endif %}
-                </div>
-            {% endfor %}
+{% block title %}{% if object %}Edit Loaf{% else %}Bake a Loaf{% endif %} - Bread Tracker{% endblock %}
 
-            <div class="actions-group">
-                <div class="primary-actions">
-                    <button type="submit" class="btn-submit">Save Loaf</button>
-                    <a href="{% url 'dashboard' %}" class="btn-cancel">Cancel</a>
-                </div>
+{% block content %}
+<div class="form-card">
+    <h2>{% if object %}Edit Loaf{% else %}Bake a Loaf{% endif %}</h2>
+    <p class="subtitle">Enter the details for your bake</p>
 
-                {% if form.instance.pk and perms.tracker.delete_loaf %}
-                    <a href="{% url 'delete_loaf' form.instance.pk %}" class="btn-delete">
-                        🗑️ Delete
-                    </a>
-                {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            {{ form.as_p }}
+        </div>
+
+        <div class="actions-group">
+            <div class="primary-actions">
+                <button type="submit" class="btn-submit">Save Loaf</button>
+                <a href="{% url 'dashboard' %}" class="btn-cancel">Cancel</a>
             </div>
-        </form>
-    </main>
-</body>
-</html>
-
+        </div>
+    </form>
+</div>
+{% endblock %}
