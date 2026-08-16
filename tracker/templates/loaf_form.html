@@ -1,54 +1,174 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍞 {{ action|default:"Start New Loaf" }}</title>
+    <title>🍞 {{ action|default:"Start New Loaf" }} - Bread Tracker</title>
     <link rel="stylesheet" href="{% static 'tracker/style.css' %}">
+    
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 16px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+
+        .form-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 500px;
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            box-sizing: border-box;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #1e293b;
+            font-size: 0.95rem;
+        }
+
+        /* Full-width inputs with comfortable tap targets for mobile */
+        .form-control,
+        .form-card input[type="text"],
+        .form-card input[type="datetime-local"],
+        .form-card select,
+        .form-card textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background-color: #ffffff;
+            color: #1e293b;
+        }
+
+        .form-control:focus,
+        .form-card input:focus,
+        .form-card select:focus,
+        .form-card textarea:focus {
+            border-color: #d97706;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+        }
+
+        /* Button Row Layout */
+        .actions-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .primary-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-submit {
+            padding: 10px 18px;
+            background-color: #d97706;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: #b45309;
+        }
+
+        .btn-cancel {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 16px;
+            background-color: transparent;
+            color: #64748b;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel:hover {
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .btn-delete {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 14px;
+            background-color: #fef2f2;
+            color: #dc2626;
+            border: 1.5px solid #fca5a5;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-delete:hover {
+            background-color: #dc2626;
+            color: #ffffff;
+        }
+    </style>
 </head>
 <body>
+    <main class="form-card">
+        <h2 style="margin: 0 0 20px 0; color: #92400e;">🍞 {{ action|default:"Start New Loaf" }}</h2>
 
-    <header>
-        <h1>🍞 {{ action|default:"Start New Loaf" }}</h1>
-        <a href="{% url 'dashboard' %}" class="btn btn-outline">← Back to Dashboard</a>
-    </header>
-
-    <main class="card" style="max-width: 500px; margin: 0 auto; padding: 24px;">
         <form method="post">
             {% csrf_token %}
-            
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-                {% for field in form %}
-                    <div>
-                        <label for="{{ field.id_for_label }}" style="display: block; font-weight: 600; margin-bottom: 6px;">
-                            {{ field.label }}
-                        </label>
-                        {{ field }}
-                        {% if field.errors %}
-                            <div style="color: #e03131; font-size: 0.85rem; margin-top: 4px;">
-                                {{ field.errors }}
-                            </div>
-                        {% endif %}
-                    </div>
-                {% endfor %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div style="color: #dc2626; font-size: 0.85rem; margin-top: 4px;">{{ field.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
 
-		<div style="display: flex; gap: 12px; margin-top: 12px; align-items: center; justify-content: space-between;">
-		    <div style="display: flex; gap: 12px;">
-			<button type="submit" class="btn btn-primary">Save Loaf</button>
-			<a href="{% url 'dashboard' %}" class="btn btn-outline">Cancel</a>
-		    </div>
+            <div class="actions-group">
+                <div class="primary-actions">
+                    <button type="submit" class="btn-submit">Save Loaf</button>
+                    <a href="{% url 'dashboard' %}" class="btn-cancel">Cancel</a>
+                </div>
 
-		    <!-- Show Delete button only when editing an existing loaf -->
-		    {% if form.instance.pk and perms.tracker.delete_loaf %}
-			<a href="{% url 'delete_loaf' form.instance.pk %}" class="btn btn-outline" style="color: #e03131 !important; border-color: #ffa8a8;">
-			    🗑️ Delete
-			</a>
-		    {% endif %}
-		</div>
+                <!-- Show Delete button only when editing an existing loaf -->
+                {% if form.instance.pk and perms.tracker.delete_loaf %}
+                    <a href="{% url 'delete_loaf' form.instance.pk %}" class="btn-delete">
+                        🗑️ Delete
+                    </a>
+                {% endif %}
             </div>
         </form>
     </main>
-
 </body>
 </html>
