@@ -1,7 +1,7 @@
 from django.utils import timezone
 from django.utils.timezone import localtime
 from django.http import JsonResponse
-from .models import BreadMachine, Loaf
+from .models import BreadMachine, Loaf, Comment
 from .forms import CommentForm, LoafForm, LoafEditForm, BreadMachineForm, UserProfileForm, AccountRequestForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, permission_required
@@ -101,7 +101,7 @@ def request_account(request):
 
 def loaf_detail(request, loaf_id):
     loaf = get_object_or_404(Loaf, id=loaf_id)
-    comments = loaf.comments.all()  # Fetches all comments for this loaf
+    comments = loaf.comments.all().order_by('created_at')  # Fetches all comments for this loaf, in chronological order
     
     if request.method == 'POST':
         # Ensure only logged-in users can post
@@ -210,6 +210,42 @@ def add_comment(request, loaf_id):
             comment.author = request.user  # Automatically assigns the logged-in user
             comment.save()
     return redirect('loaf_detail', loaf_id=loaf.id)
+@login_required
+def edit_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    
+    # Restrict access to original author or superuser
+    if request.user != comment.author and not request.user.is_superuser:
+        messages.error(request, "You do not have permission to edit this comment.")
+        return redirect('loaf_detail', loaf_id=comment.loaf.id)
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST, instance=comment)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Comment updated successfully.")
+            return redirect('loaf_detail', loaf_id=comment.loaf.id)
+    else:
+        form = CommentForm(instance=comment)
+
+    return render(request, 'comment_form.html', {'form': form, 'comment': comment})
+
+@login_required
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    
+    # Restrict access to original author or superuser
+    if request.user != comment.author and not request.user.is_superuser:
+        messages.error(request, "You do not have permission to delete this comment.")
+        return redirect('loaf_detail', loaf_id=comment.loaf.id)
+
+    if request.method == 'POST':
+        loaf_id = comment.loaf.id
+        comment.delete()
+        messages.success(request, "Comment deleted.")
+        return redirect('loaf_detail', loaf_id=loaf_id)
+
+    return render(request, 'comment_confirm_delete.html', {'comment': comment})
 
 @login_required
 def edit_profile(request):

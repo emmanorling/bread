@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}🍞 Bread Tracker{% endblock %}</title>
     
+    <link rel="icon" href="{% static 'favicon.ico' %}">
+    <script src="{% static 'coi-serviceworker.js' %}"></script>
+
     <!-- Instant theme initialization (prevents screen flashing) -->
     <script>
         const savedTheme = localStorage.getItem('theme') || 
@@ -38,36 +41,38 @@
                         <a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
                     </li>
 
-                    {% if user.is_authenticated %}
-                        <li class="nav-dropdown">
-                            <a href="#" class="nav-link dropdown-toggle">
-                                👤 {{ user.username }} <span class="arrow">▾</span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                {% if user.is_superuser %}
-                                    <li><a href="{% url 'admin:index' %}">🛠️ Admin tasks</a></li>
-                                {% else %}
-                                    {% if perms.tracker.add_breadmachine %}
-                                        <li><a href="{% url 'add_machine' %}">🤖 Add Machine</a></li>
-                                    {% endif %}
-                                {% endif %}
+		    {% if user.is_authenticated %}
+			<li class="nav-dropdown">
+			    <a href="#" class="nav-link dropdown-toggle">
+				👤 {{ user.username }} <span class="arrow">▾</span>
+			    </a>
+			    <ul class="dropdown-menu">
+				{% if user.is_superuser %}
+				    <li><a href="{% url 'admin:index' %}">🛠️ Admin tasks</a></li>
+				{% else %}
+				    {% if perms.tracker.add_breadmachine %}
+					<li><a href="{% url 'add_machine' %}">🤖 Add Machine</a></li>
+				    {% endif %}
+				{% endif %}
 
-                                <li><a href="{% url 'edit_profile' %}">⚙️ Edit Profile</a></li>
-                                <li><a href="{% url 'change_password' %}">🔒 Change Password</a></li>
-                                <li class="dropdown-divider"></li>
-                                <li>
-                                    <form method="post" action="/admin/logout/?next=/" style="margin: 0;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="dropdown-btn">🚪 Log Out</button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
-                    {% else %}
-                        <li>
-                            <a href="/admin/login/?next=/">🔑 Log In</a>
-                        </li>
-                    {% endif %}
+				<li><a href="{% url 'edit_profile' %}">⚙️ Edit Profile</a></li>
+				<li><a href="{% url 'change_password' %}">🔒 Change Password</a></li>
+				<li class="dropdown-divider"></li>
+				<li>
+				    <!-- Updated logout path -->
+				    <form method="post" action="{% url 'logout' %}" style="margin: 0;">
+					{% csrf_token %}
+					<button type="submit" class="dropdown-btn">🚪 Log Out</button>
+				    </form>
+				</li>
+			    </ul>
+			</li>
+		    {% else %}
+			<li>
+			    <!-- Updated login path -->
+			    <a href="{% url 'login' %}">🔑 Log In</a>
+			</li>
+		    {% endif %}
                 </ul>
             </nav>
         </div>

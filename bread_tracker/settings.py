@@ -23,7 +23,9 @@ SECRET_KEY = os.environ.get(
     'DJANGO_SECRET_KEY', 
     'django-insecure-0iw^mo-#6e1q5vx37e!l4@z6-om$mu4kcx81za!omynrwnmo-p' # Fallback for local runserver
 )
-
+# Set DEBUG to True in local testing environment
+# When DEBUG is False (production) don't forget to run 'python manage.py collectstatic'
+# if css is updated
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
@@ -134,3 +136,6 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'e.j.norling@gmail.com')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')                                                                                                       
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER 
 """
+
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'dashboard'

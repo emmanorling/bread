@@ -13,13 +13,21 @@
     <h3 style="font-size: 1.05rem; color: #1e293b; margin-bottom: 12px;">Comments & Notes</h3>
 
     {% for comment in comments %}
-        <div class="comment-card">
-            <div class="comment-header">
-                <span class="comment-author">{{ comment.author.username }}</span>
-                <span class="comment-time">{{ comment.created_at|date:"M d, Y H:i" }}</span>
-            </div>
-            <p class="comment-body">{{ comment.text }}</p>
-        </div>
+	<div class="comment-card">
+	    <div class="comment-header">
+		<span class="comment-author">{{ comment.author.username }}</span>
+		<span class="comment-time">{{ comment.created_at|date:"d M Y H:i" }}</span>
+	    </div>
+	    <p class="comment-body">{{ comment.text }}</p>
+
+	    <!-- Only rendered if user is the comment author OR an admin -->
+	    {% if user == comment.author or user.is_superuser %}
+		<div style="margin-top: 8px; font-size: 0.85rem;">
+		    <a href="{% url 'edit_comment' comment.id %}" class="back-link">✏️ Edit</a> |
+		    <a href="{% url 'delete_comment' comment.id %}" style="color: #ef4444; text-decoration: none;">🗑️ Delete</a>
+		</div>
+	    {% endif %}
+	</div>
     {% empty %}
         <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 16px;">No comments on this loaf yet.</p>
     {% endfor %}
