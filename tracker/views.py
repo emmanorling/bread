@@ -135,7 +135,9 @@ def add_loaf(request):
     if request.method == 'POST':
         form = LoafForm(request.POST)
         if form.is_valid():
-            loaf = form.save()
+            loaf = form.save(commit=False)
+            loaf.created_by = request.user
+            loaf.save()
             
             # Save optional initial note as first comment
             note_text = form.cleaned_data.get('initial_note')

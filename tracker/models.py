@@ -34,6 +34,15 @@ class Loaf(models.Model):
     bread_type = models.CharField(max_length=100)  # e.g., "Sourdough"
     started_at = models.DateTimeField(default=timezone.now)
     ready_at = models.DateTimeField()
+
+    # Track the baker who created the loaf
+    created_by = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='loaves'
+    )
     
     @property
     def is_active(self):
