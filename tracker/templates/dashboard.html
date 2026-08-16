@@ -30,7 +30,7 @@
 	    {% else %}
 		<!-- MACHINE IS IDLE -->
 		{% if perms.tracker.add_loaf %}
-		    <a href="{% url 'add_loaf' %}?machine_id={{ machine.id }}"><p><em>Idle / Available</em></p></a>
+		    <a href="{% url 'add_loaf' %}?machine_id={{ machine.id }}"><p><em>Start a loaf here</em></p></a>
 		{% else %}
 		    <p><em>Idle / Available</em></p>
 		{% endif %}
