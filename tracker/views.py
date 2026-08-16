@@ -92,7 +92,7 @@ def request_account(request):
                     recipient_list=list(superusers),
                 )
 
-            messages.success(request, "Account request submitted! An admin will review and enable your account shortly.")
+            messages.success(request, "Account request submitted! An admin will review and, if approved, enable your account shortly.")
             return redirect('dashboard')
     else:
         form = AccountRequestForm()

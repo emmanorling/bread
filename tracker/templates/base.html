@@ -66,6 +66,14 @@
         {% endblock %}
     </main>
 
+    {% if messages %}
+        <script>
+            {% for message in messages %}
+                alert("{{ message|escapejs }}");
+            {% endfor %}
+        </script>
+    {% endif %}
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>
