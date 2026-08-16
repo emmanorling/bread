@@ -4,8 +4,6 @@
 
 {% block content %}
 <div class="form-card">
-    <a href="{% url 'dashboard' %}" class="back-link" style="margin-bottom: 16px;">← Back to Dashboard</a>
-
     <h2>🍞 {{ loaf.bread_type }}</h2>
     <p class="subtitle">
         <strong>Machine:</strong> {{ loaf.machine.name }}<br>
@@ -38,8 +36,11 @@
                     <div class="field-error">{{ form.text.errors.0 }}</div>
                 {% endif %}
             </div>
-            <button type="submit" class="btn-submit">Submit Comment</button>
-        </form>
+	    <div class="actions-group">
+		<button type="submit" class="btn-submit">Submit Comment</button>
+		<a href="{% url 'dashboard' %}" class="btn-cancel">Cancel</a>
+	    </div>
+	    </form>
     {% else %}
         <p style="color: #64748b; font-size: 0.9rem; text-align: center;">
             <a href="/admin/login/?next={{ request.path }}" class="back-link" style="color: #d97706; font-weight: 600;">Log in</a> to leave a comment on this bake.
