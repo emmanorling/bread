@@ -1,35 +1,127 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- Viewport tag scales the page properly on mobile screens -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🍞 Request Bread Maker Account</title>
     <link rel="stylesheet" href="{% static 'tracker/style.css' %}">
+    
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 16px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+
+        .request-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 460px;
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            box-sizing: border-box;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #1e293b;
+            font-size: 0.95rem;
+        }
+
+        /* Ensure form fields fill the card and are easy to tap on phones */
+        .form-control, 
+        .request-card input[type="text"], 
+        .request-card input[type="email"], 
+        .request-card input[type="password"], 
+        .request-card textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background-color: #ffffff;
+        }
+
+        .form-control:focus, 
+        .request-card input:focus, 
+        .request-card textarea:focus {
+            border-color: #d97706;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background-color: #d97706;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: #b45309;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            color: #1e293b;
+        }
+    </style>
 </head>
-<body style="display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0;">
-    <main class="card" style="max-width: 450px; width: 100%; padding: 28px;">
-        <h2>🍞 Request Account</h2>
-        <p style="color: #6c757d; margin-bottom: 20px; font-size: 0.9rem;">
+<body>
+    <main class="request-card">
+        <h2 style="margin: 0 0 6px 0; color: #92400e;">🍞 Request Account</h2>
+        <p style="color: #64748b; font-size: 0.9rem; margin: 0 0 20px 0;">
             Fill out the form below. An admin will review and activate your account.
         </p>
 
         <form method="post">
             {% csrf_token %}
             {% for field in form %}
-                <div style="margin-bottom: 12px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 4px;">{{ field.label }}</label>
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                     {{ field }}
                     {% if field.errors %}
-                        <div style="color: #e03131; font-size: 0.85rem;">{{ field.errors }}</div>
+                        <div style="color: #dc2626; font-size: 0.85rem; margin-top: 4px;">{{ field.errors.0 }}</div>
                     {% endif %}
                 </div>
             {% endfor %}
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 12px;">Submit Request</button>
+            <button type="submit" class="btn-submit">Submit Request</button>
         </form>
 
-        <div style="text-align: center; margin-top: 16px;">
-            <a href="/admin/login/?next=/" class="btn-link-subtle">← Back to Login</a>
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="/admin/login/?next=/" class="back-link">← Back to Login</a>
         </div>
     </main>
 </body>
