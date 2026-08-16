@@ -11,7 +11,8 @@
 </head>
 <body>
 
-    <!-- Shared Navigation Bar -->
+    <!-- Wrap header in a block so child pages can override/remove it -->
+    {% block navbar %}
     <header class="navbar">
         <div class="nav-container">
             <a href="{% url 'dashboard' %}" class="nav-brand">
@@ -51,15 +52,15 @@
                         </li>
                     {% else %}
                         <li>
-                            <a href="/admin/login/?next=/">Bread Maker Login</a>
+                            <a href="/admin/login/?next=/">🔑 Log In</a>
                         </li>
                     {% endif %}
                 </ul>
             </nav>
         </div>
     </header>
+    {% endblock navbar %}
 
-    <!-- Main Page Content Slot -->
     <main class="container">
         {% block content %}
         {% endblock %}
