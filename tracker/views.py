@@ -157,6 +157,14 @@ def add_loaf(request):
 @permission_required('tracker.change_loaf', raise_exception=True)
 def edit_loaf(request, loaf_id):
     loaf = get_object_or_404(Loaf, id=loaf_id)
+
+    # Trigger a warning message if someone else created this loaf
+    if loaf.created_by and loaf.created_by != request.user:
+        messages.warning(
+            request, 
+            f"⚠️ Ownership Warning: This loaf was originally logged by {loaf.created_by.username}. Don't edit it unless you are sure you should."
+        )
+
     if request.method == 'POST':
         form = LoafEditForm(request.POST, instance=loaf)
         if form.is_valid():
@@ -164,7 +172,12 @@ def edit_loaf(request, loaf_id):
             return redirect('dashboard')
     else:
         form = LoafEditForm(instance=loaf)       
-    return render(request, 'loaf_form.html', {'form': form, 'action': 'Edit Loaf'})
+
+    return render(request, 'loaf_form.html', {
+        'form': form, 
+        'loaf': loaf, 
+        'action': 'Edit Loaf'
+    })
 
 @permission_required('tracker.delete_loaf', raise_exception=True)
 def delete_loaf(request, loaf_id):

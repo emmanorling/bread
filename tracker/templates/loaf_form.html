@@ -1,24 +1,27 @@
 {% extends "base.html" %}
 
-{% block title %}{% if object %}Edit Loaf{% else %}Bake a Loaf{% endif %} - Bread Tracker{% endblock %}
+{% block title %}Edit Loaf - Bread Tracker{% endblock %}
 
 {% block content %}
 <div class="form-card">
-    <h2>{% if object %}Edit Loaf{% else %}Bake a Loaf{% endif %}</h2>
-    <p class="subtitle">Enter the details for your bake</p>
+    <h2>Edit Loaf</h2>
+
+    <!-- Ownership Warning Callout -->
+    {% if loaf.created_by and loaf.created_by != user %}
+        <div style="background-color: #fef3c7; border: 1px solid #f59e0b; color: #92400e; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem;">
+            ⚠️ <strong>Ownership Notice:</strong> This bake was originally logged by <strong>{{ loaf.created_by.username }}</strong>. Are you sure you should be editing it?
+        </div>
+    {% endif %}
 
     <form method="post">
         {% csrf_token %}
-        
         <div class="form-group">
             {{ form.as_p }}
         </div>
 
         <div class="actions-group">
-            <div class="primary-actions">
-                <button type="submit" class="btn-submit">Save Loaf</button>
-                <a href="{% url 'dashboard' %}" class="btn-cancel">Cancel</a>
-            </div>
+            <button type="submit" class="btn-submit">Save Changes</button>
+            <a href="{% url 'dashboard' %}" class="btn-cancel">Cancel</a>
         </div>
     </form>
 </div>
