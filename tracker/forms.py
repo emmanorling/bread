@@ -49,8 +49,7 @@ class AccountRequestForm(forms.ModelForm):
 
 class LoafForm(forms.ModelForm):
     ready_in = forms.CharField(
-        label="Ready in (HH:MM)",
-        initial="03:00",
+        label="Ready in",
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': 'e.g. 03:30 or 3:30'
