@@ -1,3 +1,17 @@
+### views.py - all the views, in one handy place
+###    * api_bread_status and api_bread_history - handy helpers for the tildagon app
+###    * request_account
+###    * loaf_detail
+###    * add_loaf
+###    * edit_loaf
+###    * delete_loaf
+###    * add_comment
+###    * edit_comment
+###    * delete_comment
+###    * edit_profile
+###    * change_password
+###    * public_dashboard
+
 from django.utils import timezone
 from django.utils.timezone import localtime
 from django.http import JsonResponse
@@ -11,7 +25,9 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.core.mail import send_mail
 from django.contrib.auth.models import User, Group
+from django.views.decorators.http import require_POST
 
+# apt_bread_status - used to fetch data about bread machines for the tildagon app
 def api_bread_status(request):
     now = timezone.now()
     machines = BreadMachine.objects.all()
@@ -41,6 +57,7 @@ def api_bread_status(request):
 
     return JsonResponse({"machines": data})
 
+# apt_bread_history - used to fetch data about completed loaves for the tildagon app
 def api_bread_history(request):
     now = timezone.now()
     history_loaves = Loaf.objects.filter(ready_at__lte=now).select_related('machine').order_by('-ready_at')[:20]
@@ -123,6 +140,14 @@ def loaf_detail(request, loaf_id):
         'comments': comments,
         'form': form
     })
+
+@login_required
+@require_POST
+def mark_loaf_removed(request, loaf_id):
+    loaf = get_object_or_404(Loaf, pk=loaf_id)
+    loaf.is_removed = True
+    loaf.save()
+    return redirect('dashboard')
 
 @permission_required('tracker.add_loaf', raise_exception=True)
 def add_loaf(request):
@@ -275,28 +300,19 @@ def change_password(request):
     return render(request, 'password_change_form.html', {'form': form})
 
 def public_dashboard(request):
-    now = timezone.now()
-    
-    # Active loaves (still baking)
-    active_loaves = Loaf.objects.filter(ready_at__gt=now).select_related('machine')
-    
-    # History (finished baking)
-    history_loaves = Loaf.objects.filter(ready_at__lte=now).annotate(
-        comment_count=Count('comments')
-        ).order_by('-ready_at')[:20]
-    
-    # Machines currently in use
-    active_machine_ids = active_loaves.values_list('machine_id', flat=True)
     all_machines = BreadMachine.objects.all()
-
-    # Check if there is at least one machine free to bake
-    has_idle_machines = all_machines.exclude(id__in=active_machine_ids).exists()
     
+    # Active loaves are any loaves not yet marked as removed
+    active_loaves = Loaf.objects.filter(is_removed=False)
+    active_machine_ids = active_loaves.values_list('machine_id', flat=True)
+    
+    # History shows loaves after they've been taken out
+    history_loaves = Loaf.objects.filter(is_removed=True).order_by('-ready_at')
+
     context = {
-        'active_loaves': active_loaves,
-        'history_loaves': history_loaves,
         'all_machines': all_machines,
+        'active_loaves': active_loaves,
         'active_machine_ids': active_machine_ids,
-        'has_idle_machines': has_idle_machines,
+        'history_loaves': history_loaves,
     }
     return render(request, 'dashboard.html', context)

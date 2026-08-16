@@ -44,6 +44,7 @@ class BreadMachine(models.Model):
 # what time it was started
 # what time it is/was ready
 # who entered this information
+# whether or not the loaf is still in the machine
 class Loaf(models.Model):
     machine = models.ForeignKey(BreadMachine, on_delete=models.CASCADE, related_name='loaves')
     bread_type = models.CharField(max_length=100)  # e.g., "Sourdough"
@@ -59,10 +60,19 @@ class Loaf(models.Model):
         blank=True, 
         related_name='loaves'
     )
+
+    is_removed = models.BooleanField(
+        default=False, 
+        help_text="Designates whether the bread has been taken out of the machine."
+    )
     
     @property
     def is_active(self):
         return self.ready_at > timezone.now()
+
+    @property
+    def is_finished(self):
+        return timezone.now() >= self.ready_at
 
     class Meta:
         verbose_name = "Loaf"

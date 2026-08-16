@@ -22,6 +22,24 @@
 			<p><strong>Ready at:</strong> {{ loaf.ready_at|time:"g:i A" }}</p>
 			<p><small>Started: {{ loaf.started_at|time:"g:i A" }}</small></p>
 			
+			{% if loaf.is_finished and not loaf.is_removed %}
+			    <div class="loaf-alert" style="margin-top: 10px; margin-bottom: 10px;">
+				<p style="margin: 0 0 6px 0;">🍞 <strong>Bread Ready!</strong> Still in machine.</p>
+				<!-- Only show the removal button if the user is logged in -->
+				{% if user.is_authenticated %}
+				    <form method="post" action="{% url 'mark_loaf_removed' loaf.id %}" style="display: inline;">
+					{% csrf_token %}
+					<button type="submit" class="btn btn-success btn-sm">
+					    🧺 Mark as Removed
+					</button>
+				    </form>
+				{% else %}
+				    <small><p><a href="{% url 'login' %}">Log in</a> to mark as removed.</p>
+				    <p><small>(Or ask a GoBM member to do it for you.)</small></small></p>
+				{% endif %}
+			    </div>
+			{% endif %}
+
 			{% if perms.tracker.change_loaf %}
 			    <a href="{% url 'edit_loaf' loaf.id %}" class="btn btn-outline btn-sm" style="margin-top: 8px;">Edit Loaf</a>
 			{% endif %}
@@ -33,6 +51,8 @@
 		    <a href="{% url 'add_loaf' %}?machine_id={{ machine.id }}"><p><em>Start a loaf here</em></p></a>
 		{% else %}
 		    <p><em>Idle / Available</em></p>
+		    <small><p><a href="{% url 'login' %}">Log in</a> to start a loaf here.</p>
+		    <p><small>(Or ask a GoBM member to do it for you.)</small></small></p>
 		{% endif %}
 	    {% endif %}
 	</div>

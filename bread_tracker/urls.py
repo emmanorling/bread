@@ -38,6 +38,7 @@ urlpatterns = [
     path('comments/<int:comment_id>/delete/', views.delete_comment, name='delete_comment'),
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('loaf/<int:loaf_id>/remove/', views.mark_loaf_removed, name='mark_loaf_removed'),
 ]
 
 if settings.DEBUG:
