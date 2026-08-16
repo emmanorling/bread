@@ -30,7 +30,7 @@ def api_bread_status(request):
             elif total_minutes < 60:
                 ready_str = f"Ready in {total_minutes}m"
             else:
-                ready_str = f"Ready at {localtime(active_loaf.ready_at).strftime("%H:%M")}"
+                ready_str = f"Ready at {localtime(active_loaf.ready_at).strftime('%H:%M')}"
 
         data.append({
             "name": machine.name,
