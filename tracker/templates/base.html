@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}🍞 Bread Tracker{% endblock %}</title>
+    
+    <link rel="stylesheet" href="{% static 'tracker/style.css' %}?v=4">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Shared Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="{% url 'dashboard' %}" class="nav-brand">
+                🍞 <span>Bread Tracker</span>
+            </a>
+
+            <nav class="nav-menu">
+                <ul class="nav-links">
+                    <li>
+                        <a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
+                    </li>
+
+                    {% if user.is_authenticated %}
+                        <li class="nav-dropdown">
+                            <a href="#" class="nav-link dropdown-toggle">
+                                👤 {{ user.username }} <span class="arrow">▾</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                {% if user.is_superuser %}
+                                    <li><a href="{% url 'admin:index' %}">🛠️ Admin tasks</a></li>
+                                {% else %}
+                                    {% if perms.tracker.add_breadmachine %}
+                                        <li><a href="{% url 'add_machine' %}">🤖 Add Machine</a></li>
+                                    {% endif %}
+                                {% endif %}
+
+                                <li><a href="{% url 'edit_profile' %}">⚙️ Edit Profile</a></li>
+                                <li><a href="{% url 'change_password' %}">🔒 Change Password</a></li>
+                                <li class="dropdown-divider"></li>
+                                <li>
+                                    <form method="post" action="/admin/logout/?next=/" style="margin: 0;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-btn">🚪 Log Out</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li>
+                            <a href="/admin/login/?next=/">Bread Maker Login</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Page Content Slot -->
+    <main class="container">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
