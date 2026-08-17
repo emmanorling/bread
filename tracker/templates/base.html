@@ -40,31 +40,38 @@
                         </button>
                     </li>
 		    {% if user.is_authenticated %}
-			<li class="nav-dropdown">
-			    <a href="#" class="nav-link dropdown-toggle">
-				👤 {{ user.username }} <span class="arrow">▾</span>
-			    </a>
-			    <ul class="dropdown-menu">
-				{% if user.is_superuser %}
-				    <li><a href="{% url 'admin:index' %}">🛠️ Admin tasks</a></li>
-				{% else %}
-				    {% if perms.tracker.add_breadmachine %}
-					<li><a href="{% url 'add_machine' %}">🤖 Add Machine</a></li>
+		    	{% if user.username == 'kiosk' %}
+			    <!-- Static label for the kiosk account (no dropdown menu) -->
+			    <li>
+				<span class="nav-link" style="opacity: 0.85; cursor: default;">📱 Kiosk Mode</span>
+			    </li>
+			{% else %}
+			    <li class="nav-dropdown">
+				<a href="#" class="nav-link dropdown-toggle">
+				    👤 {{ user.username }} <span class="arrow">▾</span>
+				</a>
+				<ul class="dropdown-menu">
+				    {% if user.is_superuser %}
+					<li><a href="{% url 'admin:index' %}">🛠️ Admin tasks</a></li>
+				    {% else %}
+					{% if perms.tracker.add_breadmachine %}
+					    <li><a href="{% url 'add_machine' %}">🤖 Add Machine</a></li>
+					{% endif %}
 				    {% endif %}
-				{% endif %}
 
-				<li><a href="{% url 'edit_profile' %}">⚙️ Edit Profile</a></li>
-				<li><a href="{% url 'change_password' %}">🔒 Change Password</a></li>
-				<li class="dropdown-divider"></li>
-				<li>
-				    <!-- Updated logout path -->
-				    <form method="post" action="{% url 'logout' %}" style="margin: 0;">
-					{% csrf_token %}
-					<button type="submit" class="dropdown-btn">🚪 Log Out</button>
-				    </form>
-				</li>
-			    </ul>
-			</li>
+				    <li><a href="{% url 'edit_profile' %}">⚙️ Edit Profile</a></li>
+				    <li><a href="{% url 'change_password' %}">🔒 Change Password</a></li>
+				    <li class="dropdown-divider"></li>
+				    <li>
+					<!-- Updated logout path -->
+					<form method="post" action="{% url 'logout' %}" style="margin: 0;">
+					    {% csrf_token %}
+					    <button type="submit" class="dropdown-btn">🚪 Log Out</button>
+					</form>
+				    </li>
+				</ul>
+			    </li>
+			{% endif %}
 		    {% else %}
 			<li>
 			    <!-- Updated login path -->
