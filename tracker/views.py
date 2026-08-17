@@ -207,6 +207,7 @@ def add_loaf(request):
 
     return render(request, 'loaf_form.html', {'form': form, 'action': 'Start New Loaf'})
 
+@login_required
 @permission_required('tracker.change_loaf', raise_exception=True)
 def edit_loaf(request, loaf_id):
     loaf = get_object_or_404(Loaf, id=loaf_id)
@@ -232,6 +233,7 @@ def edit_loaf(request, loaf_id):
         'action': 'Edit Loaf'
     })
 
+@login_required
 @permission_required('tracker.delete_loaf', raise_exception=True)
 def delete_loaf(request, loaf_id):
     loaf = get_object_or_404(Loaf, id=loaf_id)
@@ -240,6 +242,7 @@ def delete_loaf(request, loaf_id):
         return redirect('dashboard')
     return render(request, 'loaf_confirm_delete.html', {'loaf': loaf})
 
+@login_required
 @permission_required('tracker.add_breadmachine', raise_exception=True)
 def add_machine(request):
     if request.method == 'POST':
