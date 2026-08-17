@@ -101,7 +101,14 @@ class Loaf(models.Model):
             delta = timezone.now() - self.started_oven_bake_at
             return int(delta.total_seconds() // 60)
         return 0
-    
+
+    @property
+    def minutes_until_ready(self):
+        if self.ready_at and self.ready_at > timezone.now():
+            delta = self.ready_at - timezone.now()
+            return int(delta.total_seconds() // 60)
+        return 0
+        
     @property
     def is_active(self):
         return self.ready_at > timezone.now()

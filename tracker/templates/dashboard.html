@@ -20,7 +20,11 @@
 		{% for loaf in active_loaves %}
 		    {% if loaf.machine_id == machine.id and loaf.status == 'baking_in_machine' %}
 			<p><strong>Loaf:</strong> {{ loaf.bread_type }}</p>
-			<p><strong>Ready at:</strong> {{ loaf.ready_at|time:"g:i A" }}</p>
+			{% if loaf.minutes_until_ready > 0 and loaf.minutes_until_ready < 60 %}
+			    <p><strong>Ready in:</strong> {{ loaf.minutes_until_ready }} min{{ loaf.minutes_until_ready|pluralize }}</p>
+			{% else %}
+			    <p><strong>Ready at:</strong> {{ loaf.ready_at|time:"g:i A" }}</p>
+			{% endif %}
 			<p><small>Started: {{ loaf.started_at|time:"g:i A" }}</small></p>
 			
 			{% if loaf.is_finished and not loaf.is_removed %}
