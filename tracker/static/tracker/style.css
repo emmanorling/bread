@@ -553,3 +553,85 @@ a:hover {
 [data-theme="dark"] .btn-mark-removed:hover {
     background-color: #4ade80;
 }
+
+/* Apply 3D push-button effect to all buttons and button classes */
+button,
+.btn,
+.btn-submit,
+.btn-cancel,
+.btn-mark-removed,
+.dropdown-btn,
+input[type="submit"] {
+    position: relative;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    
+    /* 3D depth effect: top highlight + solid bottom shadow */
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transition: all 0.1s ease;
+}
+
+/* Hover state: slightly increase brightness */
+button:hover,
+.btn:hover,
+.btn-submit:hover,
+.btn-mark-removed:hover {
+    filter: brightness(1.08);
+}
+
+/* Click/Active state: physical "push-down" effect */
+button:active,
+.btn:active,
+.btn-submit:active,
+.btn-cancel:active,
+.btn-mark-removed:active,
+.dropdown-btn:active,
+input[type="submit"]:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Ensure anchor tag buttons register transforms and depth */
+a.btn,
+.btn {
+    display: inline-block;
+    text-decoration: none;
+    text-align: center;
+    line-height: 1.2;
+    padding: 6px 12px;
+}
+
+/* Small button sizing */
+.btn-sm {
+    padding: 2px 2px;
+    line-height: 1.1;
+    font-size: 0.75rem;
+}
+
+/* Upgrade outline buttons from transparent links to solid 3D buttons */
+.btn-outline {
+    background-color: #f1f5f9;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 3px 0 #94a3b8, inset 0 1px 0 #ffffff;
+}
+
+.btn-outline:hover {
+    background-color: #e2e8f0;
+    color: #0f172a;
+}
+
+/* Dark Theme overrides for outline buttons */
+[data-theme="dark"] .btn-outline {
+    background-color: #334155;
+    color: #f8fafc;
+    border: 1px solid #475569;
+    box-shadow: 0 3px 0 #0f172a, inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .btn-outline:hover {
+    background-color: #475569;
+    color: #ffffff;
+}
