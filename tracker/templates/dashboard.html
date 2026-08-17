@@ -29,8 +29,8 @@
 				{% if user.is_authenticated %}
 				    <form method="post" action="{% url 'mark_loaf_removed' loaf.id %}" style="display: inline;">
 					{% csrf_token %}
-					<button type="submit" class="btn btn-success btn-sm">
-					    🧺 Mark as Removed
+					<button type="submit" class="btn-mark-removed">
+					   🍞 Mark as Removed
 					</button>
 				    </form>
 				{% else %}
