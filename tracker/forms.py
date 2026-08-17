@@ -124,12 +124,26 @@ class LoafForm(forms.ModelForm):
 # Form to edit an existing loaf (gives warning if user wasn't the one who started the loaf,
 # but still permits editing)
 class LoafEditForm(forms.ModelForm):
+    minutes_proving = forms.IntegerField(
+        required=False,
+        min_value=0,
+        label="Proving Time (minutes)",
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
+    )
+    minutes_baking = forms.IntegerField(
+        required=False,
+        min_value=0,
+        label="Oven Bake Time (minutes)",
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
+    )
+
     class Meta:
         model = Loaf
-        fields = ['machine', 'bread_type', 'started_at', 'ready_at']
+        fields = ['machine', 'bread_type', 'is_dough_only', 'started_at', 'ready_at']
         widgets = {
             'bread_type': forms.TextInput(attrs={'placeholder': 'e.g., White loaf', 'class': 'form-control'}),
             'machine': forms.Select(attrs={'class': 'form-control'}),
+            'is_dough_only': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
             'started_at': forms.DateTimeInput(
                 format='%Y-%m-%dT%H:%M',
                 attrs={'type': 'datetime-local', 'class': 'form-control'}
@@ -142,6 +156,7 @@ class LoafEditForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.label_suffix = ""
         
         # Tell Django to accept ISO format input on submission
         self.fields['started_at'].input_formats = ['%Y-%m-%dT%H:%M']
@@ -155,6 +170,29 @@ class LoafEditForm(forms.ModelForm):
             if self.instance.ready_at:
                 local_ready = timezone.localtime(self.instance.ready_at)
                 self.initial['ready_at'] = local_ready.strftime('%Y-%m-%dT%H:%M')
+
+            # Populate proving and baking minutes
+            if self.instance.is_dough_only:
+                self.initial['minutes_proving'] = self.instance.minutes_proving
+                self.initial['minutes_baking'] = self.instance.minutes_baking
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+
+        # Recalculate underlying timestamps if dough-only fields were modified
+        if instance.is_dough_only and instance.ready_at:
+            bake_mins = self.cleaned_data.get('minutes_baking')
+            prov_mins = self.cleaned_data.get('minutes_proving')
+
+            if bake_mins is not None:
+                instance.started_oven_bake_at = instance.ready_at - datetime.timedelta(minutes=bake_mins)
+
+            if prov_mins is not None and instance.started_oven_bake_at:
+                instance.removed_from_machine_at = instance.started_oven_bake_at - datetime.timedelta(minutes=prov_mins)
+
+        if commit:
+            instance.save()
+        return instance
 
 # Form to add an additional bread machine to the database
 class BreadMachineForm(forms.ModelForm):

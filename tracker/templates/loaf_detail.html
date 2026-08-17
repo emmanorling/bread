@@ -8,6 +8,13 @@
     <p class="subtitle">
         <strong>Machine:</strong> {{ loaf.machine.name }}<br>
         <strong>Completed:</strong> {{ loaf.ready_at|date:"M d, Y H:i" }}
+
+	<!-- Oven baked breakdown -->
+        {% if loaf.is_dough_only %}
+            <br><strong>🥖 Oven Baked (Dough only in machine)</strong>
+            <br><strong>Proving Time:</strong> {{ loaf.minutes_proving }} minute{{ loaf.minutes_proving|pluralize }}
+            <br><strong>Oven Bake Time:</strong> {{ loaf.minutes_baking }} minute{{ loaf.minutes_baking|pluralize }}
+        {% endif %}
     </p>
 
     <h3 style="font-size: 1.05rem; color: #1e293b; margin-bottom: 12px;">Comments & Notes</h3>
