@@ -50,6 +50,12 @@ class Loaf(models.Model):
     bread_type = models.CharField(max_length=100)  # e.g., "Sourdough"
     started_at = models.DateTimeField(default=timezone.now)
     ready_at = models.DateTimeField()
+    STATUS_CHOICES = [
+        ('baking_in_machine', 'Baking in Machine'),
+        ('proving', 'Proving'),
+        ('baking_in_oven', 'Baking in Oven'),
+        ('finished', 'Finished'),
+    ]
 
     # Track the baker who created the loaf
     # Use this to warn others if they go to edit it
@@ -65,6 +71,35 @@ class Loaf(models.Model):
         default=False, 
         help_text="Designates whether the bread has been taken out of the machine."
     )
+
+    is_dough_only = models.BooleanField(
+        default=False, 
+        verbose_name="Dough only (requires proving & oven bake)"
+    )
+    status = models.CharField(
+        max_length=20, 
+        choices=STATUS_CHOICES, 
+        default='baking_in_machine'
+    )
+
+    # Timestamps for stage tracking (for dough only in machine)
+    removed_from_machine_at = models.DateTimeField(null=True, blank=True)
+    started_oven_bake_at = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def minutes_proving(self):
+        if self.removed_from_machine_at:
+            end_time = self.started_oven_bake_at or timezone.now()
+            delta = end_time - self.removed_from_machine_at
+            return int(delta.total_seconds() // 60)
+        return 0
+
+    @property
+    def minutes_baking(self):
+        if self.started_oven_bake_at:
+            delta = timezone.now() - self.started_oven_bake_at
+            return int(delta.total_seconds() // 60)
+        return 0
     
     @property
     def is_active(self):

@@ -635,3 +635,25 @@ a.btn,
     background-color: #475569;
     color: #ffffff;
 }
+
+/* Align checkbox before the label on the same line */
+.form-card p:has(input[type="checkbox"]) {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+/* Ensure the label doesn't take up full width or wrap strangely */
+.form-card p:has(input[type="checkbox"]) label {
+    margin-bottom: 0;
+    cursor: pointer;
+}
+
+.form-card p:has(input[type="checkbox"]) input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}

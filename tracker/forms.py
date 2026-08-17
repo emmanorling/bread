@@ -82,14 +82,16 @@ class LoafForm(forms.ModelForm):
 
     class Meta:
         model = Loaf
-        fields = ['machine', 'bread_type']
+        fields = ['bread_type', 'machine', 'is_dough_only']
         widgets = {
             'bread_type': forms.TextInput(attrs={'placeholder': 'e.g., White loaf', 'class': 'form-control'}),
             'machine': forms.Select(attrs={'class': 'form-control'}),
+            'is_dough_only': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.label_suffix = ""
         # Exclude machines currently running an active loaf
         now = timezone.now()
         self.fields['machine'].queryset = BreadMachine.objects.exclude(loaves__ready_at__gt=now)

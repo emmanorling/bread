@@ -39,6 +39,8 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('loaf/<int:loaf_id>/remove/', views.mark_loaf_removed, name='mark_loaf_removed'),
+    path('loaf/<int:loaf_id>/start-bake/', views.start_oven_bake, name='start_oven_bake'),
+    path('loaf/<int:loaf_id>/finish/', views.finish_loaf, name='finish_loaf'),
 ]
 
 if settings.DEBUG:

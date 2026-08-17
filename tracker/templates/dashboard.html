@@ -3,6 +3,7 @@
 {% block title %}Dashboard - Bread Tracker{% endblock %}
 
 {% block content %}
+    <!-- 1. ACTIVE MACHINES GRID -->
     <h2>Active Machines</h2>
     <div class="grid">
 	{% for machine in all_machines %}
@@ -17,25 +18,20 @@
 	    {% if machine.id in active_machine_ids %}
 		<!-- MACHINE IS BUSY -->
 		{% for loaf in active_loaves %}
-		    {% if loaf.machine_id == machine.id %}
+		    {% if loaf.machine_id == machine.id and loaf.status == 'baking_in_machine' %}
 			<p><strong>Loaf:</strong> {{ loaf.bread_type }}</p>
 			<p><strong>Ready at:</strong> {{ loaf.ready_at|time:"g:i A" }}</p>
 			<p><small>Started: {{ loaf.started_at|time:"g:i A" }}</small></p>
 			
 			{% if loaf.is_finished and not loaf.is_removed %}
-			    <div class="loaf-alert" style="margin-top: 10px; margin-bottom: 10px;">
-				<p style="margin: 0 0 6px 0;">🍞 <strong>Bread Ready!</strong> Still in machine.</p>
-				<!-- Only show the removal button if the user is logged in -->
+			    <!-- BREAD / DOUGH READY IN MACHINE -->
+			    <div class="loaf-alert">
+				<p style="margin: 0 0 6px 0;">🍞 <strong>{% if loaf.is_dough_only %}Dough{% else %}Bread{% endif %} Ready!</strong> Still in machine.</p>
 				{% if user.is_authenticated %}
 				    <form method="post" action="{% url 'mark_loaf_removed' loaf.id %}" style="display: inline;">
 					{% csrf_token %}
-					<button type="submit" class="btn-mark-removed">
-					   🍞 Mark as Removed
-					</button>
+					<button type="submit" class="btn-mark-removed">🧺 Mark as Removed</button>
 				    </form>
-				{% else %}
-				    <small><p><a href="{% url 'login' %}">Log in</a> to mark as removed.</p>
-				    <p><small>(Or ask a GoBM member to do it for you.)</small></small></p>
 				{% endif %}
 			    </div>
 			{% endif %}
@@ -59,6 +55,51 @@
 	{% endfor %}
     </div>
 
+    <!-- 2. OFF-MACHINE DOUGH (PROVING & BAKING IN OVEN) -->
+    <h2>Dough in Progress (for oven-baked bread)</h2>
+    <div class="grid">
+        {% for loaf in active_loaves %}
+            {% if loaf.status == 'proving' or loaf.status == 'baking_in_oven' %}
+                <div class="card active">
+                    <h3>🍞 {{ loaf.bread_type }}</h3>
+                    <p><small>Machine: {{ loaf.machine.name }}</small></p>
+
+                    {% if loaf.status == 'proving' %}
+                        <!-- PROVING STATE -->
+                        <div class="loaf-alert" style="background-color: #fef3c7; border-color: #f59e0b; color: #92400e; margin-top: 10px;">
+                            <p style="margin: 0 0 6px 0;">⏳ <strong>Proving:</strong> {{ loaf.minutes_proving }} minute{{ loaf.minutes_proving|pluralize }}</p>
+                            {% if user.is_authenticated %}
+                                <form method="post" action="{% url 'start_oven_bake' loaf.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm" style="background-color: #f59e0b; color: #fff;">🔥 Bake in Oven</button>
+                                </form>
+                            {% endif %}
+                        </div>
+
+                    {% elif loaf.status == 'baking_in_oven' %}
+                        <!-- BAKING IN OVEN STATE -->
+                        <div class="loaf-alert" style="background-color: #fee2e2; border-color: #f87171; color: #991b1b; margin-top: 10px;">
+                            <p style="margin: 0 0 6px 0;">🔥 <strong>Baking:</strong> {{ loaf.minutes_baking }} minute{{ loaf.minutes_baking|pluralize }}</p>
+                            {% if user.is_authenticated %}
+                                <form method="post" action="{% url 'finish_loaf' loaf.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm" style="background-color: #dc2626; color: #fff;">✅ Finished</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    {% if perms.tracker.change_loaf %}
+                        <a href="{% url 'edit_loaf' loaf.id %}" class="btn btn-outline btn-sm" style="margin-top: 8px;">Edit Loaf</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% empty %}
+            <p style="color: #64748b; font-size: 0.9rem;">No dough currently proving or baking in the oven.</p>
+        {% endfor %}
+    </div>
+
+    <!-- 3. BAKING HISTORY -->
     <h2>Baking History</h2>
     <div class="history-list">
 	{% for loaf in history_loaves %}
@@ -75,7 +116,6 @@
 		</div>
 
 		<div>
-		    <!-- Explicit View / Comment button -->
 		    <a href="{% url 'loaf_detail' loaf.id %}" class="btn btn-outline btn-sm">
 			💬 View / Comment
 		    </a>
@@ -87,4 +127,10 @@
 	    </div>
 	{% endfor %}
     </div>
+
+    <script>
+        setTimeout(function() {
+            window.location.reload();
+        }, 60000);
+    </script>
 {% endblock %}

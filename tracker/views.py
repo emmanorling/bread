@@ -146,6 +146,34 @@ def loaf_detail(request, loaf_id):
 def mark_loaf_removed(request, loaf_id):
     loaf = get_object_or_404(Loaf, pk=loaf_id)
     loaf.is_removed = True
+    loaf.removed_from_machine_at = timezone.now()
+    
+    if loaf.is_dough_only:
+        loaf.status = 'proving'
+    else:
+        loaf.status = 'finished'
+
+    loaf.save()
+    return redirect('dashboard')
+
+@login_required
+@require_POST
+def start_oven_bake(request, loaf_id):
+    loaf = get_object_or_404(Loaf, pk=loaf_id)
+    loaf.status = 'baking_in_oven'
+    loaf.started_oven_bake_at = timezone.now()
+    loaf.save()
+    return redirect('dashboard')
+
+@login_required
+@require_POST
+def finish_loaf(request, loaf_id):
+    loaf = get_object_or_404(Loaf, pk=loaf_id)
+    loaf.status = 'finished'
+
+    # Update ready_at to the current timestamp when removed from the oven
+    loaf.ready_at = timezone.now()
+
     loaf.save()
     return redirect('dashboard')
 
@@ -303,11 +331,15 @@ def public_dashboard(request):
     all_machines = BreadMachine.objects.all()
     
     # Active loaves are any loaves not yet marked as removed
-    active_loaves = Loaf.objects.filter(is_removed=False)
-    active_machine_ids = active_loaves.values_list('machine_id', flat=True)
+    active_loaves = Loaf.objects.exclude(status='finished')
+
+    # ONLY occupy the machine if it's still inside the bread machine
+    active_machine_ids = Loaf.objects.filter(
+        status='baking_in_machine'
+    ).values_list('machine_id', flat=True)
     
-    # History shows loaves after they've been taken out
-    history_loaves = Loaf.objects.filter(is_removed=True).order_by('-ready_at')
+    # History shows loaves after they're finished
+    history_loaves = Loaf.objects.filter(status='finished').order_by('-ready_at')
 
     context = {
         'all_machines': all_machines,
