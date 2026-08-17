@@ -12,7 +12,7 @@ forms.py = python script for handling all the forms, all in one place, including
 import datetime
 from django import forms
 from django.utils import timezone
-from .models import Loaf, BreadMachine, Comment
+from .models import Loaf, BreadMachine, Comment, SiteSetting
 from django.contrib.auth.models import User
 
 # Form to allow user to update personal information
@@ -91,6 +91,14 @@ class LoafForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Check global site settings
+        settings, _ = SiteSetting.objects.get_or_create(id=1)
+        
+        # If dough mode is disabled, strip the field from the form
+        if not settings.show_dough_section and 'is_dough_only' in self.fields:
+            del self.fields['is_dough_only']
+
         self.label_suffix = ""
         # Exclude machines currently running an active loaf
         now = timezone.now()

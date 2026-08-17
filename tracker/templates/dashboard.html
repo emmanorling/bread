@@ -56,6 +56,7 @@
     </div>
 
     <!-- 2. OFF-MACHINE DOUGH (PROVING & BAKING IN OVEN) -->
+    {% if show_dough_section %}
     <h2>Dough in Progress (for oven-baked bread)</h2>
     <div class="grid">
         {% for loaf in active_loaves %}
@@ -98,6 +99,7 @@
             <p style="color: #64748b; font-size: 0.9rem;">No dough currently proving or baking in the oven.</p>
         {% endfor %}
     </div>
+    {% endif %}
 
     <!-- 3. BAKING HISTORY -->
     <h2>Baking History</h2>

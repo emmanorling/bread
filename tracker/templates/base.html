@@ -53,6 +53,18 @@
 				<ul class="dropdown-menu">
 				    {% if user.is_superuser %}
 					<li><a href="{% url 'admin:index' %}">🛠️ Admin tasks</a></li>
+					<li>
+					    <form method="post" action="{% url 'toggle_dough_section' %}" style="margin: 0;">
+						{% csrf_token %}
+						<button type="submit" class="dropdown-btn">
+						    {% if show_dough_section %}
+							🙈 Hide Dough Section
+						    {% else %}
+							🥖 Show Dough Section
+						    {% endif %}
+						</button>
+					    </form>
+					</li>
 				    {% else %}
 					{% if perms.tracker.add_breadmachine %}
 					    <li><a href="{% url 'add_machine' %}">🤖 Add Machine</a></li>

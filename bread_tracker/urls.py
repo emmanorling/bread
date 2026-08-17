@@ -41,6 +41,7 @@ urlpatterns = [
     path('loaf/<int:loaf_id>/remove/', views.mark_loaf_removed, name='mark_loaf_removed'),
     path('loaf/<int:loaf_id>/start-bake/', views.start_oven_bake, name='start_oven_bake'),
     path('loaf/<int:loaf_id>/finish/', views.finish_loaf, name='finish_loaf'),
+    path('toggle-dough-section/', views.toggle_dough_section, name='toggle_dough_section'),
 ]
 
 if settings.DEBUG:

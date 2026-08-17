@@ -15,10 +15,10 @@
 from django.utils import timezone
 from django.utils.timezone import localtime
 from django.http import JsonResponse
-from .models import BreadMachine, Loaf, Comment
+from .models import BreadMachine, Loaf, Comment, SiteSetting
 from .forms import CommentForm, LoafForm, LoafEditForm, BreadMachineForm, UserProfileForm, AccountRequestForm
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.db.models import Count
 from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
@@ -76,6 +76,16 @@ def api_bread_history(request):
         })
         
     return JsonResponse({"history": data})
+
+@user_passes_test(lambda u: u.is_superuser)
+def toggle_dough_section(request):
+    if request.method == 'POST':
+        settings, _ = SiteSetting.objects.get_or_create(id=1)
+        settings.show_dough_section = not settings.show_dough_section
+        settings.save()
+    
+    # Redirect back to the page the user was previously viewing
+    return redirect(request.META.get('HTTP_REFERER', 'dashboard'))
 
 def request_account(request):
     if request.method == 'POST':

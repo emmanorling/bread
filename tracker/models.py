@@ -2,6 +2,7 @@
 ###    * BreadMachine
 ###    * Loaf
 ###    * Comment
+###    * SiteSettings
 
 from django.db import models
 from django.utils import timezone
@@ -131,3 +132,17 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.author.username} on {self.loaf}"
+
+
+class SiteSetting(models.Model):
+    show_dough_section = models.BooleanField(
+        default=True,
+        verbose_name="Show 'Dough in Progress' section on dashboard"
+    )
+
+    class Meta:
+        verbose_name = "Site Setting"
+        verbose_name_plural = "Site Settings"
+
+    def __str__(self):
+        return "Global Site Settings"
