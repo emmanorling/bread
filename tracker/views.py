@@ -57,20 +57,23 @@ def api_bread_status(request):
 
     return JsonResponse({"machines": data})
 
-# apt_bread_history - used to fetch data about completed loaves for the tildagon app
+# api_bread_history - used to fetch data about completed loaves for the tildagon app
 def api_bread_history(request):
-    now = timezone.now()
-    history_loaves = Loaf.objects.filter(ready_at__lte=now).select_related('machine').order_by('-ready_at')[:20]
+    # Fetch only finished loaves
+    history_loaves = Loaf.objects.filter(status='finished').select_related('machine')[:50]
+    
+    # Sort them by their actual completed time (descending)
+    sorted_loaves = sorted(history_loaves, key=lambda l: l.completed_at, reverse=True)[:20]
+    
     data = []
-
-    for loaf in history_loaves:
+    for loaf in sorted_loaves:
         # Combine comments into a formatted notes string for the badge
         comment_texts = [f"{c.author.username}: {c.text}" for c in loaf.comments.all()]
         notes_summary = "\n".join(comment_texts) if comment_texts else getattr(loaf, 'notes', 'No notes recorded.')
 
         data.append({
             "name": loaf.bread_type,
-            "date": localtime(loaf.ready_at).strftime("%d %b %H:%M") if loaf.ready_at else "",
+            "date": localtime(loaf.completed_at).strftime("%d %b %H:%M") if loaf.completed_at else "",
             "machine": loaf.machine.name if loaf.machine else "Unknown",
             "notes": notes_summary
         })
