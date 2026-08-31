@@ -113,11 +113,7 @@ class Loaf(models.Model):
     @property
     def completed_at(self):
         if self.is_dough_only:
-            if self.finished_at:
-                return self.finished_at
-            elif self.removed_from_machine_at:
-                # Fallback for old records: machine removal time + proving + baking
-                return self.removed_from_machine_at + timezone.timedelta(minutes=self.minutes_proving + self.minutes_baking)
+            return self.removed_from_machine_at + timezone.timedelta(minutes=self.minutes_proving + self.minutes_baking)
         return self.ready_at
 
     @property
