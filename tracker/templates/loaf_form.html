@@ -26,15 +26,23 @@
     {% endif %}
 
     <form method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            {{ form.as_p }}
-        </div>
+	{% csrf_token %}
+	
+	{% for field in form %}
+	    <div class="form-group" style="margin-bottom: 15px;">
+		<label for="{{ field.id_for_label }}"><strong>{{ field.label }}:</strong></label>
+		{{ field }}
+		{% if field.help_text %}
+		    <small style="color: #64748b; display: block;">{{ field.help_text }}</small>
+		{% endif %}
+		{% for error in field.errors %}
+		    <p style="color: #dc2626; margin: 0;">{{ error }}</p>
+		{% endfor %}
+	    </div>
+	{% endfor %}
 
-        <div class="actions-group">
-            <button type="submit" class="btn-submit">Save Changes</button>
-            <a href="{% url 'dashboard' %}" class="btn-cancel">Cancel</a>
-        </div>
+	<button type="submit" class="btn btn-primary">Save Changes</button>
+	<a href="{% url 'dashboard' %}" class="btn btn-outline">Cancel</a>
     </form>
 </div>
 

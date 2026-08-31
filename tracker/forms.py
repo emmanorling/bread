@@ -131,6 +131,7 @@ class LoafForm(forms.ModelForm):
 
 # Form to edit an existing loaf (gives warning if user wasn't the one who started the loaf,
 # but still permits editing)
+# Form to edit an existing loaf
 class LoafEditForm(forms.ModelForm):
     minutes_proving = forms.IntegerField(
         required=False,
@@ -166,11 +167,16 @@ class LoafEditForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.label_suffix = ""
         
+        # Check global site settings to hide dough checkbox if disabled
+        settings, _ = SiteSetting.objects.get_or_create(id=1)
+        if not settings.show_dough_section and 'is_dough_only' in self.fields:
+            del self.fields['is_dough_only']
+
         # Tell Django to accept ISO format input on submission
         self.fields['started_at'].input_formats = ['%Y-%m-%dT%H:%M']
         self.fields['ready_at'].input_formats = ['%Y-%m-%dT%H:%M']
 
-        # Convert stored UTC datetimes to local time before formatting for the browser input
+        # Convert stored UTC datetimes to local time before formatting for browser input
         if self.instance and self.instance.pk:
             if self.instance.started_at:
                 local_start = timezone.localtime(self.instance.started_at)
@@ -187,16 +193,19 @@ class LoafEditForm(forms.ModelForm):
     def save(self, commit=True):
         instance = super().save(commit=False)
 
-        # Recalculate underlying timestamps if dough-only fields were modified
+        # Update stage timestamps dynamically when saving changes to proving/baking minutes
         if instance.is_dough_only and instance.ready_at:
-            bake_mins = self.cleaned_data.get('minutes_baking')
-            prov_mins = self.cleaned_data.get('minutes_proving')
+            bake_mins = self.cleaned_data.get('minutes_baking') or 0
+            prov_mins = self.cleaned_data.get('minutes_proving') or 0
 
-            if bake_mins is not None:
-                instance.started_oven_bake_at = instance.ready_at - datetime.timedelta(minutes=bake_mins)
+            # 1. Set machine removal time (ready_at + proving duration)
+            instance.removed_from_machine_at = instance.ready_at + datetime.timedelta(minutes=prov_mins)
+            
+            # 2. Set oven start time
+            instance.started_oven_bake_at = instance.removed_from_machine_at
 
-            if prov_mins is not None and instance.started_oven_bake_at:
-                instance.removed_from_machine_at = instance.started_oven_bake_at - datetime.timedelta(minutes=prov_mins)
+            # 3. Lock in final finish time (ready_at + proving + baking)
+            instance.finished_at = instance.ready_at + datetime.timedelta(minutes=prov_mins + bake_mins)
 
         if commit:
             instance.save()
