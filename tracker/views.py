@@ -61,26 +61,34 @@ def api_bread_status(request):
 # api_bread_history - used to fetch data about completed loaves for the tildagon app
 @never_cache
 def api_bread_history(request):
-    # Fetch only finished loaves
-    history_loaves = Loaf.objects.filter(status='finished').select_related('machine')[:50]
+    # Fetch finished loaves
+    finished_loaves = Loaf.objects.filter(status='finished').select_related('machine')
     
-    # Sort them by their actual completed time (descending)
-    sorted_loaves = sorted(history_loaves, key=lambda l: l.completed_at, reverse=True)[:20]
+    # Sort by completion time (most recent first)
+    sorted_loaves = sorted(
+        finished_loaves, 
+        key=lambda l: getattr(l, 'completed_at', None) or getattr(l, 'finished_at', None) or l.ready_at, 
+        reverse=True
+    )[:20]
     
-    data = []
+    history_data = []
     for loaf in sorted_loaves:
-        # Combine comments into a formatted notes string for the badge
-        comment_texts = [f"{c.author.username}: {c.text}" for c in loaf.comments.all()]
-        notes_summary = "\n".join(comment_texts) if comment_texts else getattr(loaf, 'notes', 'No notes recorded.')
+        # Get completion time
+        comp_time = getattr(loaf, 'completed_at', None) or getattr(loaf, 'finished_at', None) or loaf.ready_at
+        formatted_date = timezone.localtime(comp_time).strftime("%d %b %H:%M") if comp_time else ""
 
-        data.append({
+        # Fetch comments/notes
+        comment_texts = [f"{c.author.username}: {c.text}" for c in loaf.comments.all()]
+        notes_summary = "\n".join(comment_texts) if comment_texts else getattr(loaf, 'notes', '') or 'No notes recorded.'
+
+        history_data.append({
             "name": loaf.bread_type,
-            "date": localtime(loaf.completed_at).strftime("%d %b %H:%M") if loaf.completed_at else "",
+            "date": formatted_date,
             "machine": loaf.machine.name if loaf.machine else "Unknown",
             "notes": notes_summary
         })
-        
-    return JsonResponse({"history": data})
+
+    return JsonResponse({"history": history_data})
 
 @user_passes_test(lambda u: u.is_superuser)
 def toggle_dough_section(request):
