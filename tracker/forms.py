@@ -197,19 +197,25 @@ class LoafEditForm(forms.ModelForm):
             bake_mins = self.cleaned_data.get('minutes_baking') or 0
             prov_mins = self.cleaned_data.get('minutes_proving') or 0
 
-            # If the user edited proving minutes manually
+            # 1. Handle Proving stage adjustments
             if prov_mins > 0:
-                # Calculate when it was taken out of the machine relative to when oven bake started or current status
                 if instance.started_oven_bake_at:
                     instance.removed_from_machine_at = instance.started_oven_bake_at - datetime.timedelta(minutes=prov_mins)
                 elif instance.status == 'proving':
                     instance.removed_from_machine_at = timezone.now() - datetime.timedelta(minutes=prov_mins)
-            else:
-                # If still proving and proving mins isn't manually overridden, ensure removed_from_machine_at stays set
-                if instance.status == 'proving' and not instance.removed_from_machine_at:
-                    instance.removed_from_machine_at = timezone.now()
+            elif instance.status == 'proving' and not instance.removed_from_machine_at:
+                instance.removed_from_machine_at = timezone.now()
 
-            # If finished, set the final lock timestamp
+            # 2. Handle Baking in Oven stage adjustments
+            if bake_mins > 0:
+                if instance.finished_at:
+                    instance.started_oven_bake_at = instance.finished_at - datetime.timedelta(minutes=bake_mins)
+                elif instance.status == 'baking_in_oven':
+                    instance.started_oven_bake_at = timezone.now() - datetime.timedelta(minutes=bake_mins)
+            elif instance.status == 'baking_in_oven' and not instance.started_oven_bake_at:
+                instance.started_oven_bake_at = timezone.now()
+
+            # 3. Handle Finished stage lock
             if instance.status == 'finished':
                 instance.finished_at = instance.ready_at + datetime.timedelta(minutes=prov_mins + bake_mins)
 
