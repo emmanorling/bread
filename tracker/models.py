@@ -91,20 +91,34 @@ class Loaf(models.Model):
     @property
     def minutes_proving(self):
         if self.removed_from_machine_at:
-            # Prefer started_oven_bake_at, then finished_at, then fallback to timezone.now()
-            end_time = self.started_oven_bake_at or self.finished_at or timezone.now()
-            delta = end_time - self.removed_from_machine_at
-            return int(delta.total_seconds() // 60)
+            end_time = self.started_oven_bake_at or self.finished_at
+            if not end_time and self.status != 'finished':
+                end_time = timezone.now()
+            if end_time:
+                delta = end_time - self.removed_from_machine_at
+                return max(0, int(delta.total_seconds() // 60))
         return 0
 
     @property
     def minutes_baking(self):
         if self.started_oven_bake_at:
-            # Freeze calculation at finished_at if available instead of calling timezone.now()
-            end_time = self.finished_at or timezone.now()
-            delta = end_time - self.started_oven_bake_at
-            return int(delta.total_seconds() // 60)
+            end_time = self.finished_at
+            if not end_time and self.status != 'finished':
+                end_time = timezone.now()
+            if end_time:
+                delta = end_time - self.started_oven_bake_at
+                return max(0, int(delta.total_seconds() // 60))
         return 0
+
+    @property
+    def completed_at(self):
+        if self.is_dough_only:
+            if self.finished_at:
+                return self.finished_at
+            elif self.removed_from_machine_at:
+                # Fallback for old records: machine removal time + proving + baking
+                return self.removed_from_machine_at + timezone.timedelta(minutes=self.minutes_proving + self.minutes_baking)
+        return self.ready_at
 
     @property
     def minutes_until_ready(self):
@@ -120,18 +134,6 @@ class Loaf(models.Model):
     @property
     def is_finished(self):
         return timezone.now() >= self.ready_at
-
-    @property
-    def completed_at(self):
-        """
-        Returns the final completed timestamp.
-        For dough-only loaves with a recorded completion timestamp, return finished_at.
-        Otherwise, return ready_at.
-        """
-        # Use stored finished_at timestamp when present
-        if self.is_dough_only and self.finished_at:
-            return self.finished_at
-        return self.ready_at
 
     class Meta:
         verbose_name = "Loaf"
