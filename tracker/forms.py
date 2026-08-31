@@ -193,19 +193,25 @@ class LoafEditForm(forms.ModelForm):
     def save(self, commit=True):
         instance = super().save(commit=False)
 
-        # Update stage timestamps dynamically when saving changes to proving/baking minutes
         if instance.is_dough_only and instance.ready_at:
             bake_mins = self.cleaned_data.get('minutes_baking') or 0
             prov_mins = self.cleaned_data.get('minutes_proving') or 0
 
-            # 1. Set machine removal time (ready_at + proving duration)
-            instance.removed_from_machine_at = instance.ready_at + datetime.timedelta(minutes=prov_mins)
-            
-            # 2. Set oven start time
-            instance.started_oven_bake_at = instance.removed_from_machine_at
+            # If the user edited proving minutes manually
+            if prov_mins > 0:
+                # Calculate when it was taken out of the machine relative to when oven bake started or current status
+                if instance.started_oven_bake_at:
+                    instance.removed_from_machine_at = instance.started_oven_bake_at - datetime.timedelta(minutes=prov_mins)
+                elif instance.status == 'proving':
+                    instance.removed_from_machine_at = timezone.now() - datetime.timedelta(minutes=prov_mins)
+            else:
+                # If still proving and proving mins isn't manually overridden, ensure removed_from_machine_at stays set
+                if instance.status == 'proving' and not instance.removed_from_machine_at:
+                    instance.removed_from_machine_at = timezone.now()
 
-            # 3. Lock in final finish time (ready_at + proving + baking)
-            instance.finished_at = instance.ready_at + datetime.timedelta(minutes=prov_mins + bake_mins)
+            # If finished, set the final lock timestamp
+            if instance.status == 'finished':
+                instance.finished_at = instance.ready_at + datetime.timedelta(minutes=prov_mins + bake_mins)
 
         if commit:
             instance.save()
