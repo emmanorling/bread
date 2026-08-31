@@ -58,6 +58,7 @@ def api_bread_status(request):
     return JsonResponse({"machines": data})
 
 # api_bread_history - used to fetch data about completed loaves for the tildagon app
+@never_cache
 def api_bread_history(request):
     # Fetch only finished loaves
     history_loaves = Loaf.objects.filter(status='finished').select_related('machine')[:50]
