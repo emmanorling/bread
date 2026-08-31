@@ -180,6 +180,7 @@ def start_oven_bake(request, loaf_id):
 def finish_loaf(request, loaf_id):
     loaf = get_object_or_404(Loaf, pk=loaf_id)
     loaf.status = 'finished'
+    loaf.finished_at = timezone.now()  # <-- ADD THIS LINE
 
     loaf.save()
     return redirect('dashboard')

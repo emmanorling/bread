@@ -86,11 +86,13 @@ class Loaf(models.Model):
     # Timestamps for stage tracking (for dough only in machine)
     removed_from_machine_at = models.DateTimeField(null=True, blank=True)
     started_oven_bake_at = models.DateTimeField(null=True, blank=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
 
     @property
     def minutes_proving(self):
         if self.removed_from_machine_at:
-            end_time = self.started_oven_bake_at or timezone.now()
+            # Prefer started_oven_bake_at, then finished_at, then fallback to timezone.now()
+            end_time = self.started_oven_bake_at or self.finished_at or timezone.now()
             delta = end_time - self.removed_from_machine_at
             return int(delta.total_seconds() // 60)
         return 0
@@ -98,7 +100,9 @@ class Loaf(models.Model):
     @property
     def minutes_baking(self):
         if self.started_oven_bake_at:
-            delta = timezone.now() - self.started_oven_bake_at
+            # Freeze calculation at finished_at if available instead of calling timezone.now()
+            end_time = self.finished_at or timezone.now()
+            delta = end_time - self.started_oven_bake_at
             return int(delta.total_seconds() // 60)
         return 0
 
@@ -118,18 +122,15 @@ class Loaf(models.Model):
         return timezone.now() >= self.ready_at
 
     @property
-
     def completed_at(self):
         """
         Returns the final completed timestamp.
-        For dough-only loaves that completed an oven bake, it calculates:
-        (time removed from machine) + (proving duration) + (oven bake duration).
-        Otherwise, returns the original ready_at.
+        For dough-only loaves with a recorded completion timestamp, return finished_at.
+        Otherwise, return ready_at.
         """
-        if self.is_dough_only and self.removed_from_machine_at:
-            # Total duration = minutes proving + minutes baking in oven
-            total_dough_minutes = self.minutes_proving + self.minutes_baking
-            return self.removed_from_machine_at + timezone.timedelta(minutes=total_dough_minutes)
+        # Use stored finished_at timestamp when present
+        if self.is_dough_only and self.finished_at:
+            return self.finished_at
         return self.ready_at
 
     class Meta:
