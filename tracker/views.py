@@ -26,6 +26,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.core.mail import send_mail
 from django.contrib.auth.models import User, Group
 from django.views.decorators.http import require_POST
+from django.views.decorators.cache import never_cache
 
 # apt_bread_status - used to fetch data about bread machines for the tildagon app
 def api_bread_status(request):
