@@ -112,7 +112,7 @@
 	    <div class="history-card">
 		<div>
 		    <strong>{{ loaf.bread_type }}</strong>
-		    <span> - Was ready at {{ loaf.ready_at|date:"H:i" }} on {{ loaf.ready_at|date:"j-m-Y" }}</span>
+		    <span> - Was ready at {{ loaf.completed_at|date:"H:i" }} on {{ loaf.completed_at|date:"j-m-Y" }}</span>
 
 		    {% if loaf.comment_count > 0 %}
 			<span class="comment-count">

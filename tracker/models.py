@@ -117,6 +117,21 @@ class Loaf(models.Model):
     def is_finished(self):
         return timezone.now() >= self.ready_at
 
+    @property
+
+    def completed_at(self):
+        """
+        Returns the final completed timestamp.
+        For dough-only loaves that completed an oven bake, it calculates:
+        (time removed from machine) + (proving duration) + (oven bake duration).
+        Otherwise, returns the original ready_at.
+        """
+        if self.is_dough_only and self.removed_from_machine_at:
+            # Total duration = minutes proving + minutes baking in oven
+            total_dough_minutes = self.minutes_proving + self.minutes_baking
+            return self.removed_from_machine_at + timezone.timedelta(minutes=total_dough_minutes)
+        return self.ready_at
+
     class Meta:
         verbose_name = "Loaf"
         verbose_name_plural = "Loaves"  # <-- Fixes "Loafs" -> "Loaves"

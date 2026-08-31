@@ -181,9 +181,6 @@ def finish_loaf(request, loaf_id):
     loaf = get_object_or_404(Loaf, pk=loaf_id)
     loaf.status = 'finished'
 
-    # Update ready_at to the current timestamp when removed from the oven
-    loaf.ready_at = timezone.now()
-
     loaf.save()
     return redirect('dashboard')
 
